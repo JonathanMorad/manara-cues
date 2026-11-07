@@ -190,7 +190,9 @@ h1,h2,h3,p{margin:0}
 
 /* sheets */
 .scrim{position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100%);z-index:20;background:rgba(5,7,18,.55);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:620px;max-height:94%;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;padding:18px 16px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.sheet{width:100%;max-width:620px;max-height:94%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--surface);border-radius:22px 22px 0 0;padding:18px 16px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+body.sheet-open{overflow:hidden;overscroll-behavior:none}
+.sheet input,.sheet textarea,.sheet select{scroll-margin-block:18px}
 .sheet h2{font-family:var(--display);font-weight:700;font-size:28px;line-height:1}
 .sheetrow{display:flex;gap:10px}
 .sheetrow .btn{flex:1}

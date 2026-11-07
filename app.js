@@ -96,7 +96,11 @@ function ic(n,sz){ sz=sz||22; return '<svg width="'+sz+'" height="'+sz+'" viewBo
 /* ===== render ===== */
 function render(){
   applyTheme();
-  var app=document.getElementById("app"), y=window.scrollY;
+  var app=document.getElementById("app"), y=window.scrollY, active=document.activeElement, focusState=null, oldSheet=document.querySelector(".sheet"), sheetScroll=oldSheet?oldSheet.scrollTop:0;
+  if(active&&app.contains(active)&&/^(INPUT|TEXTAREA)$/.test(active.tagName)){
+    focusState={id:active.id||"",field:active.getAttribute("data-f"),scene:active.getAttribute("data-scene"),tag:active.tagName,start:null,end:null,direction:"none"};
+    try{focusState.start=active.selectionStart;focusState.end=active.selectionEnd;focusState.direction=active.selectionDirection||"none";}catch(e){}
+  }
   var h;
   if(S.fatal) h = renderFatal();
   else if(!S.ready) h = '<div class="auth">'+logo(120)+'<p class="muted">Loading…</p></div>';
@@ -105,8 +109,20 @@ function render(){
   h += renderSheet();
   if(S.toast) h += '<div class="toast" role="status">'+esc(S.toast)+'</div>';
   app.innerHTML = h;
+  document.body.classList.toggle("sheet-open",!!S.sheet);
   applyLanguage();
-  if(!S.live) window.scrollTo(0,y);
+  var newSheet=document.querySelector(".sheet");
+  if(newSheet&&sheetScroll) newSheet.scrollTop=sheetScroll;
+  if(focusState){
+    var replacement=focusState.id?document.getElementById(focusState.id):null;
+    if(!replacement&&focusState.scene!==null) replacement=document.querySelector('.sheet input[data-scene="'+focusState.scene+'"]');
+    if(!replacement&&focusState.field!==null) replacement=[].slice.call(app.querySelectorAll("[data-f]")).filter(function(x){return x.tagName===focusState.tag&&x.getAttribute("data-f")===focusState.field;})[0];
+    if(replacement){
+      try{replacement.focus({preventScroll:true});}catch(e){try{replacement.focus();}catch(ignore){}}
+      if(focusState.start!==null&&focusState.end!==null) try{replacement.setSelectionRange(focusState.start,focusState.end,focusState.direction);}catch(e){}
+    }
+  }
+  if(!S.live&&!S.sheet) window.scrollTo(0,y);
 }
 function softRender(){ if(S.sheet) S.dirty=true; else render(); }
 function renderFatal(){
@@ -500,7 +516,7 @@ function renderSheet(){
 }
 
 /* ===== sheets: open/close, keep text when re-rendering ===== */
-function focusSheetField(selector){ var t=document.querySelector(selector); if(t){ try{t.focus();}catch(e){} } }
+function focusSheetField(selector){ var t=document.querySelector(selector); if(t){ try{t.focus({preventScroll:true});}catch(e){try{t.focus();}catch(ignore){}} } }
 function openSheet(sh){
   S.sheet=sh; render();
   if(sh.type==="new-prod"||sh.type==="edit-prod") focusSheetField('.sheet input[data-f="pname"]');
@@ -823,7 +839,16 @@ document.addEventListener("keydown",function(ev){
   t.blur();
   if(t.closest("form[data-form=login]")) handle("login"); else if(t.closest("form[data-form=setup]")) handle("setup");
 });
-function fitView(){ var v=window.visualViewport; if(!v) return; var r=document.documentElement.style; r.setProperty("--vvh",v.height+"px"); r.setProperty("--vvt",v.offsetTop+"px"); }
+var viewportFrame=0;
+function fitView(){
+  if(!window.visualViewport||viewportFrame) return;
+  viewportFrame=requestAnimationFrame(function(){
+    var v=window.visualViewport, r=document.documentElement.style;
+    r.setProperty("--vvh",Math.round(v.height)+"px");
+    r.setProperty("--vvt",Math.round(v.offsetTop)+"px");
+    viewportFrame=0;
+  });
+}
 if(window.visualViewport){ window.visualViewport.addEventListener("resize",fitView); window.visualViewport.addEventListener("scroll",fitView); fitView(); }
 if(window.matchMedia){
   var colorScheme=window.matchMedia("(prefers-color-scheme: dark)");
