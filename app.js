@@ -425,6 +425,7 @@ function renderSheet(){
   var sh=S.sheet; if(!sh) return '';
   var h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true">';
   var p=prod();
+  if(sh.type==="event" && sh.pid) p=S.prods.filter(function(x){return x.id===sh.pid;})[0]||p;
   if(sh.type==="cue"){
     var d=sh.draft, acts=actionsFor(d.dept);
     h+='<h2>'+(sh.isNew?'New cue':'Edit cue '+numberOf(d))+'</h2>';
@@ -507,7 +508,7 @@ function renderSheet(){
       +(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')+rowBtns("Cancel","save-script","Save script");
   }
   else if(sh.type==="event"){
-    h+='<h2>'+(sh.id?'Edit date':'Add a date')+'</h2>'
+    h+='<h2>'+(sh.id?'Edit date':'Add a date')+'</h2><p class="hint">For '+esc(p.name)+'</p>'
       +'<div class="seg"><button data-act="event-kind" data-k="rehearsal" aria-pressed="'+(sh.kind==="rehearsal")+'">Rehearsal</button><button data-act="event-kind" data-k="show" aria-pressed="'+(sh.kind==="show")+'">Production</button></div>'
       +field("eventTitle","Name",sh.title,"e.g. Full cast rehearsal")
       +field("eventDate","Date",sh.date,"",{type:"date"})+field("eventTime","Time",sh.time,"",{type:"time"})
@@ -584,10 +585,10 @@ function selectProd(id){
   ["cues","notes","events","highlights","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
   Object.keys(unsub.responses||{}).forEach(function(k){try{unsub.responses[k]();}catch(e){}}); unsub.responses={};
   if(id && S.user){
-    unsub.cues=DB.watchCues(id,function(l){ S.cues=l; softRender(); });
-    unsub.notes=DB.watchNotes(id,S.user.uid,function(l){ S.notes=l; softRender(); });
-    unsub.events=DB.watchEvents(id,Object.assign({},S.user,{isDirector:isDirector()}),function(l){ S.events=l; watchEventResponses(id,allVisibleEvents()); softRender(); });
-    unsub.scripts=DB.watchScripts(id,function(l){ S.scripts=l; softRender(); });
+    unsub.cues=DB.watchCues(id,function(l){ if(S.pid!==id)return; S.cues=l; softRender(); });
+    unsub.notes=DB.watchNotes(id,S.user.uid,function(l){ if(S.pid!==id)return; S.notes=l; softRender(); });
+    unsub.events=DB.watchEvents(id,Object.assign({},S.user,{isDirector:isDirector()}),function(l){ if(S.pid!==id)return; S.events=l; watchEventResponses(id,allVisibleEvents()); softRender(); });
+    unsub.scripts=DB.watchScripts(id,function(l){ if(S.pid!==id)return; S.scripts=l; softRender(); });
   }
   watchCurrentHighlights();
 }
@@ -764,24 +765,24 @@ function handle(act, el){
       var clearScene=scene(); if(!clearScene) break; S.highlights=[]; render();
       absorb(DB.saveHighlights(p.id,clearScene.id,S.user.uid,[]),"Could not clear your highlights"); break;
 
-    case "new-event": openSheet({type:"event",kind:"rehearsal",title:"",date:dateInputValue(Date.now()+86400000),time:"19:00",memberIds:Object.keys(p.members||{}),err:""}); break;
+    case "new-event": openSheet({type:"event",pid:p.id,kind:"rehearsal",title:"",date:dateInputValue(Date.now()+86400000),time:"19:00",memberIds:Object.keys(p.members||{}),err:""}); break;
     case "edit-event":
       var ev0=S.events.filter(function(x){return x.id===el.getAttribute("data-id");})[0];
-      if(ev0) openSheet({type:"event",id:ev0.id,kind:ev0.kind,title:ev0.title,date:dateInputValue(ev0.startsAt),time:timeInputValue(ev0.startsAt),memberIds:(ev0.memberIds||[]).slice(),err:""}); break;
+      if(ev0) openSheet({type:"event",id:ev0.id,pid:ev0.pid||p.id,kind:ev0.kind,title:ev0.title,date:dateInputValue(ev0.startsAt),time:timeInputValue(ev0.startsAt),memberIds:(ev0.memberIds||[]).slice(),err:""}); break;
     case "event-kind": S.sheet.kind=el.getAttribute("data-k"); render(); break;
-    case "event-all": S.sheet.memberIds=Object.keys(p.members||{}); render(); break;
+    case "event-all": var inviteProd=S.prods.filter(function(x){return x.id===S.sheet.pid;})[0]||p; S.sheet.memberIds=Object.keys(inviteProd.members||{}); render(); break;
     case "event-none": S.sheet.memberIds=[]; render(); break;
     case "event-attendee":
       var aid=el.getAttribute("data-id"), ai=S.sheet.memberIds.indexOf(aid);
       if(ai>-1) S.sheet.memberIds.splice(ai,1); else S.sheet.memberIds.push(aid); render(); break;
     case "save-event":
-      var es=S.sheet, start=es.date?new Date(es.date+"T"+(es.time||"19:00")).getTime():NaN;
+      var es=S.sheet, eventProd=S.prods.filter(function(x){return x.id===es.pid;})[0]||p, eventPid=eventProd.id, start=es.date?new Date(es.date+"T"+(es.time||"19:00")).getTime():NaN;
       if(!(es.title||"").trim()){es.err="Give this date a name.";render();break;}
       if(!Number.isFinite(start)){es.err="Choose a valid date and time.";render();break;}
-      var directors=Object.keys(p.members||{}).filter(function(id){return roleList(p.members[id]).indexOf("director")>-1;});
-      var chosen=directors.concat(es.memberIds||[]).filter(function(id,i,a){return a.indexOf(id)===i&&(p.memberIds||[]).indexOf(id)>-1;});
+      var directors=Object.keys(eventProd.members||{}).filter(function(id){return roleList(eventProd.members[id]).indexOf("director")>-1;});
+      var chosen=directors.concat(es.memberIds||[]).filter(function(id,i,a){return a.indexOf(id)===i&&(eventProd.memberIds||[]).indexOf(id)>-1;});
       if(!chosen.length){es.err="Choose at least one person to see this date.";render();break;}
-      absorb(DB.saveEvent(p.id,{id:es.id||uid(),pid:p.id,productionName:p.name,kind:es.kind,title:es.title.trim(),startsAt:start,memberIds:chosen,createdBy:es.id?(S.events.filter(function(x){return x.id===es.id;})[0]||{}).createdBy||S.user.uid:S.user.uid,updatedAt:Date.now()}),"Could not save date").then(function(){closeSheet();}); break;
+      absorb(DB.saveEvent(eventPid,{id:es.id||uid(),pid:eventPid,productionName:eventProd.name,kind:es.kind,title:es.title.trim(),startsAt:start,memberIds:chosen,createdBy:es.id?(S.events.filter(function(x){return x.id===es.id;})[0]||{}).createdBy||S.user.uid:S.user.uid,updatedAt:Date.now()}),"Could not save date").then(function(){closeSheet();}); break;
     case "del-event":
       var eid=el.getAttribute("data-id");
       if(S.confirmEventDelete!==eid){S.confirmEventDelete=eid;render();break;}
