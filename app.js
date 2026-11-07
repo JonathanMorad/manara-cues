@@ -2,7 +2,7 @@
 "use strict";
 
 /* ===== constants ===== */
-var ROLES = [{id:"director",label:"Director"},{id:"actor",label:"Actor"},{id:"sound",label:"Sound"},{id:"lighting",label:"Lighting"}];
+var ROLES = [{id:"director",label:"Director"},{id:"actor",label:"Actor"},{id:"writer",label:"Writer"},{id:"sound",label:"Sound"},{id:"lighting",label:"Lighting"}];
 var SOUND = [
   {id:"play",label:"Play",color:"var(--a-play)"},{id:"fadein",label:"Fade in",color:"var(--a-fadein)"},{id:"fadeout",label:"Fade out",color:"var(--a-fadeout)"},
   {id:"volup",label:"Volume up",color:"var(--a-volup)"},{id:"duck",label:"Volume down",color:"var(--a-duck)"},{id:"stop",label:"Stop",color:"var(--a-stop)"}];
@@ -13,7 +13,7 @@ var SWATCHES = ["#FFFFFF","#FFD27A","#FF8A3D","#E5484D","#E255A1","#8E6BFF","#3E
 /* ===== state ===== */
 var DB = null;
 var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, scripts:[], highlights:[],
-  tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
+  tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", lang:"en", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
 var unsub = {users:null, prods:null, cues:null, notes:null, events:null, publicShows:null, highlights:null, scripts:null, responses:{}};
 
 /* ===== helpers ===== */
@@ -34,6 +34,7 @@ function myRoles(){ var p=prod(); return roleList(p&&S.user&&p.members&&p.member
 function myRole(){ return myRoles()[0]||null; }
 function isDirector(){ return isAdmin()||myRoles().indexOf("director")>-1; }
 function canEditDept(d){ return isDirector()||myRoles().indexOf(d)>-1; }
+function canEditScript(){ return isDirector()||myRoles().indexOf("writer")>-1; }
 function myDepts(){ if(isDirector()) return ["sound","lighting"]; return myRoles().filter(function(r){ return r==="sound"||r==="lighting"; }); }
 function scene(){ var p=prod(); if(!p) return null; for(var i=0;i<p.scenes.length;i++) if(p.scenes[i].id===S.sceneId) return p.scenes[i]; S.sceneId=p.scenes[0]?p.scenes[0].id:null; return p.scenes[0]||null; }
 function sceneIndex(id){ var p=prod(); if(!p) return 99; for(var i=0;i<p.scenes.length;i++) if(p.scenes[i].id===id) return i; return 99; }
@@ -57,6 +58,15 @@ function applyTheme(){
   else document.documentElement.setAttribute("data-theme",S.theme);
   var meta=document.querySelector('meta[name="theme-color"]');
   if(meta) meta.content=effectiveTheme()==="dark"?"#111214":"#F1F0ED";
+}
+var AR_TEXT={"Loading…":"جارٍ التحميل…","Username":"اسم المستخدم","Code":"رمز الدخول","Sign in":"تسجيل الدخول","Your username and code come from your team admin.":"تحصل على اسم المستخدم ورمز الدخول من مسؤول الفريق.","Current production":"الإنتاج الحالي","No production selected":"لم يتم اختيار إنتاج","Productions":"الإنتاجات","Choose a production":"اختر إنتاجًا","No productions yet.":"لا توجد إنتاجات بعد.","New production":"إنتاج جديد","Home":"الرئيسية","Calendar":"التقويم","Production":"الإنتاج","Team":"الفريق","Your part":"دورك","Next date":"الموعد القادم","Production materials":"مواد الإنتاج","Read the script, your role cues, and rehearsal notes in one place.":"اقرأ النص وإشارات دورك وملاحظات البروفات في مكان واحد.","Open calendar":"افتح التقويم","Nothing scheduled yet.":"لا توجد مواعيد بعد.","Script":"النص","Cues":"الإشارات","Notes":"الملاحظات","Rehearsal":"بروفة","Production / show":"عرض","Month":"شهر","Agenda":"قائمة","Today":"اليوم","Add date":"أضف موعدًا","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","This rehearsal is for selected members of this production.":"هذه البروفة مخصصة للأعضاء المحددين في هذا الإنتاج.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Yellow":"أصفر","Green":"أخضر","Pink":"وردي","Blue":"أزرق","Clear mine":"امسح تمييزاتي","Edit":"تعديل","Add text":"أضف النص","Change my code":"غيّر رمز دخولي","Sign out":"تسجيل الخروج","Add":"إضافة","Everyone with an account":"كل أصحاب الحسابات","New person":"شخص جديد","Nobody added yet.":"لم تتم إضافة أحد بعد.","Rename production or edit scenes":"غيّر اسم الإنتاج أو عدّل المشاهد","Edit production":"تعديل الإنتاج","Production name":"اسم الإنتاج","Scenes":"المشاهد","Type a scene name, then press Next. Add or move scenes with the controls.":"اكتب اسم المشهد ثم اضغط التالي. أضف المشاهد أو حرّكها باستخدام الأزرار.","Cancel":"إلغاء","Create":"إنشاء","Save":"حفظ","Roles":"الأدوار","A person can have more than one role in this production.":"يمكن للشخص أن يؤدي أكثر من دور في هذا الإنتاج.","Save roles":"حفظ الأدوار","Remove from production":"إزالة من الإنتاج","Tap again to remove":"اضغط مرة أخرى للإزالة","Character / part in this production":"الشخصية / الدور في هذا الإنتاج","e.g. Layla":"مثال: ليلى","Assign the character or part this person plays in this production.":"حدد الشخصية أو الدور الذي يؤديه هذا الشخص في هذا الإنتاج.","Director":"مخرج","Actor":"ممثل","Writer":"كاتب","Sound":"صوت","Lighting":"إضاءة","Member":"عضو","Admin":"مشرف","Close":"إغلاق","Everyone with an account is already in this production. An admin can create new accounts in the Team tab.":"كل أصحاب الحسابات موجودون بالفعل في هذا الإنتاج. يمكن للمشرف إنشاء حسابات جديدة من صفحة الفريق.","Choose every role this person has in this production.":"اختر كل الأدوار التي يؤديها هذا الشخص في هذا الإنتاج.","Choose a person and at least one role.":"اختر شخصًا ودورًا واحدًا على الأقل.","Choose at least one role.":"اختر دورًا واحدًا على الأقل.","Playing:":"يجسد شخصية:","Add cue":"أضف إشارة","Add note":"أضف ملاحظة","Notes for you":"ملاحظات لك","Private notes are only visible to you.":"الملاحظات الخاصة لا يراها سواك.","To myself":"لنفسي","To a person":"لشخص","Send to":"إرسال إلى","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Who can RSVP?":"من يمكنه تأكيد الحضور؟","Who should see this rehearsal?":"من يمكنه رؤية هذه البروفة؟","All production members":"كل أعضاء الإنتاج","Clear selection":"إلغاء التحديد","Show dates are visible to all Manara users. Only selected production members can RSVP.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. يمكن لأعضاء الإنتاج المحددين تأكيد الحضور.","Only selected people in this production can see this rehearsal. Directors are always included.":"الأشخاص المحددون فقط في هذا الإنتاج يرون هذه البروفة. يُضاف المخرجون دائمًا.","Create admin":"إنشاء حساب المشرف","First-time setup":"الإعداد الأول","Create the admin account. You will use it to add everyone else.":"أنشئ حساب المشرف، وستستخدمه لإضافة بقية الفريق.","Your name":"اسمك","Code (at least 6 characters)":"رمز الدخول (6 أحرف على الأقل)","Writer":"كاتب","Arabic":"عربي","Switch language":"تغيير اللغة","☼ Light":"☼ فاتح","◐ Dark":"◐ داكن","Previous month":"الشهر السابق","Next month":"الشهر التالي","Previous scene":"المشهد السابق","Next scene":"المشهد التالي","Sound":"صوت","Lighting":"إضاءة","All":"الكل","Play":"تشغيل","Fade in":"زيادة تدريجية","Fade out":"خفض تدريجي","Volume up":"رفع الصوت","Volume down":"خفض الصوت","Stop":"إيقاف","Flicker":"وميض","Account created.":"تم إنشاء الحساب.","Full name":"الاسم الكامل","Also make this person an admin":"اجعل هذا الشخص مشرفًا أيضًا","Create account":"إنشاء الحساب","Details":"التفاصيل","Private":"خاص","To myself":"لنفسي","To a person":"لشخص","New note":"ملاحظة جديدة","New cue":"إشارة جديدة","Save cue":"حفظ الإشارة","Trigger (the line or action that cues it)":"المحفّز (الجملة أو الحركة التي تبدأ الإشارة)","Track or sound":"المسار أو الصوت","Note for the booth":"ملاحظة لمقصورة التحكم","Who is it for":"لمن هذه الملاحظة؟","Add rehearsal":"أضف بروفة","Edit date":"تعديل الموعد","Delete":"حذف","Going":"سأحضر","Not going":"لن أحضر","Days until":"الأيام المتبقية","Search":"بحث","Save date":"حفظ الموعد","Rehearsal / show":"بروفة / عرض","Writing":"كتابة","Copy details":"نسخ التفاصيل","Done":"تم"};
+function applyLanguage(){
+  var ar=S.lang==="ar", root=document.documentElement;
+  root.lang=ar?"ar":"en"; root.dir=ar?"rtl":"ltr";
+  if(!ar)return;
+  var app=document.getElementById("app"), walker=document.createTreeWalker(app,NodeFilter.SHOW_TEXT), node;
+  while((node=walker.nextNode())){var raw=node.nodeValue,trim=raw.trim(),translated=AR_TEXT[trim];if(translated)node.nodeValue=raw.replace(trim,translated);}
+  app.querySelectorAll("[aria-label],[title],[placeholder]").forEach(function(el){["aria-label","title","placeholder"].forEach(function(a){var v=el.getAttribute(a);if(v&&AR_TEXT[v])el.setAttribute(a,AR_TEXT[v]);});});
 }
 
 /* ===== logo ===== */
@@ -90,6 +100,7 @@ function render(){
   h += renderSheet();
   if(S.toast) h += '<div class="toast" role="status">'+esc(S.toast)+'</div>';
   app.innerHTML = h;
+  applyLanguage();
   if(!S.live) window.scrollTo(0,y);
 }
 function softRender(){ if(S.sheet) S.dirty=true; else render(); }
@@ -124,6 +135,7 @@ function renderShell(){
   h += '<header class="top">'+logo(40)
     +'<div class="top-production"><small>Current production</small><b>'+esc(p?p.name:"No production selected")+'</b></div>'
     +'<button class="theme-toggle" data-act="theme-toggle" aria-label="Switch to '+(effectiveTheme()==="dark"?'light':'dark')+' mode">'+(effectiveTheme()==="dark"?'☼ Light':'◐ Dark')+'</button>'
+    +'<button class="language-toggle" data-act="language-toggle" aria-label="Switch language">'+(S.lang==="ar"?'English':'عربي')+'</button>'
     +'<button class="avatar" data-act="tab" data-t="team" aria-label="Your profile">'+esc(initials(S.user.name))+'</button></header>';
   h+='<div class="production-selector-bar"><div class="production-sidebar-title">Productions</div><nav class="production-list" aria-label="Choose a production">';
   if(S.prods.length) S.prods.forEach(function(x){ h+='<button class="production-choice" data-act="switch-prod" data-id="'+esc(x.id)+'" aria-current="'+(x.id===S.pid)+'"><span class="production-indicator" aria-hidden="true"></span><span class="production-choice-name">'+esc(x.name)+'</span></button>'; });
@@ -205,7 +217,8 @@ function renderProduction(p){
 }
 function renderProductionOverview(p){
   var upcoming=nextEvent(p.id), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).length;
-  var h='<div class="card"><div class="row"><h3 class="grow">Your part</h3><span class="badge">'+esc(roleLabel(myRoles())||(isAdmin()?"Admin":"Member"))+'</span></div><p class="muted small">'+p.scenes.length+(p.scenes.length===1?' scene':' scenes')+' · '+(p.memberIds||[]).length+' people</p></div>';
+  var character=(p.characters||{})[S.user.uid];
+  var h='<div class="card"><div class="row"><h3 class="grow">Your part</h3><span class="badge">'+esc(roleLabel(myRoles())||(isAdmin()?"Admin":"Member"))+'</span></div>'+(character?'<p class="character-part"><b>Playing:</b> '+esc(character)+'</p>':'')+'<p class="muted small">'+p.scenes.length+(p.scenes.length===1?' scene':' scenes')+' · '+(p.memberIds||[]).length+' people</p></div>';
   h+='<div class="card"><h3>Next date</h3>'+(upcoming?'<b>'+esc(upcoming.title)+'</b><p class="muted small">'+esc(dateLabel(upcoming.startsAt))+' · '+(daysUntil(upcoming.startsAt)===0?'Today':daysUntil(upcoming.startsAt)===1?'Tomorrow':'In '+daysUntil(upcoming.startsAt)+' days')+'</p>':'<p class="muted">Nothing scheduled yet.</p>')+'<button class="btn" data-act="tab" data-t="calendar">Open calendar</button></div>';
   h+='<div class="card"><h3>Production materials</h3><p class="muted">Read the script, your role cues, and rehearsal notes in one place.</p><div class="sheetrow"><button class="btn" data-act="prod-view" data-v="script">Script</button><button class="btn" data-act="prod-view" data-v="cues">Cues</button></div><button class="btn" data-act="prod-view" data-v="notes">'+mine+' note'+(mine===1?'':'s')+' for you</button></div>';
   if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Edit production and scenes</button>';
@@ -214,7 +227,7 @@ function renderProductionOverview(p){
 function renderScript(p){
   var s=scene(), doc=s&&S.scripts.filter(function(x){ return x.id===s.id; })[0], h='<h2 class="section-title">Script</h2>';
   if(!s) return h+'<div class="empty">Add a scene to start the script.</div>';
-  h+='<div class="card script-card"><div class="row"><b class="grow">'+esc(s.name)+'</b>'+(isDirector()?'<button class="btn" data-act="edit-script" data-id="'+s.id+'">'+(doc?'Edit':'Add text')+'</button>':'')+'</div>';
+  h+='<div class="card script-card"><div class="row"><b class="grow">'+esc(s.name)+'</b>'+(canEditScript()?'<button class="btn" data-act="edit-script" data-id="'+s.id+'">'+(doc?'Edit':'Add text')+'</button>':'')+'</div>';
   h+=doc&&doc.text?'<div class="highlight-tools"><span class="hint">Select text, then choose a color. Only you can see your highlights.</span><div class="highlight-colors">'+[['yellow','Yellow'],['green','Green'],['pink','Pink'],['blue','Blue']].map(function(x){return '<button class="highlight-color '+x[0]+'" data-act="script-highlight" data-color="'+x[0]+'" aria-label="Highlight selected text '+x[1].toLowerCase()+'">'+x[1]+'</button>';}).join('')+(S.highlights.length?'<button class="highlight-clear" data-act="clear-highlights">Clear mine</button>':'')+'</div></div><pre id="script-body" class="script-text">'+renderHighlightedScript(doc.text,S.highlights)+'</pre>':'<p class="muted">The director has not added this scene’s script yet.</p>';
   if(doc&&doc.updatedAt) h+='<p class="hint">Updated '+esc(dateLabel(doc.updatedAt))+'</p>';
   return h+'</div>';
@@ -323,7 +336,8 @@ function renderTeam(p){
     if(!ids.length) h+='<div class="empty">Nobody added yet.</div>';
     ids.sort(function(a,b){ return nameOf(a).localeCompare(nameOf(b)); }).forEach(function(id){
       var role=p.members[id];
-      h+='<button class="li" data-act="member" data-id="'+id+'"'+(isDirector()?'':' disabled')+'><span class="grow"><b>'+esc(nameOf(id))+'</b><br><small>@'+esc((userById(id)||{}).username||"")+'</small></span><span class="badge">'+esc(roleLabel(role))+'</span></button>';
+      var part=(p.characters||{})[id];
+      h+='<button class="li" data-act="member" data-id="'+id+'"'+(isDirector()?'':' disabled')+'><span class="grow"><b>'+esc(nameOf(id))+'</b><br><small>@'+esc((userById(id)||{}).username||"")+(part?'<br><span class="character-part">Playing: '+esc(part)+'</span>':'')+'</small></span><span class="badge">'+esc(roleLabel(role))+'</span></button>';
     });
     if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Rename production or edit scenes</button>';
   }
@@ -411,6 +425,7 @@ function renderSheet(){
     var u=userById(sh.uid)||{name:"Person"};
     h+='<h2>'+esc(u.name)+'</h2><div class="field"><label>Roles in '+esc(p.name)+'</label><p class="hint">A person can have more than one role in this production.</p><div class="roles">'
       +ROLES.map(function(r){ return '<button class="role" data-act="member-role" data-r="'+r.id+'" aria-pressed="'+(sh.roles.indexOf(r.id)>-1)+'">'+r.label+'</button>'; }).join('')+'</div></div>'
+      +field("character","Character / part in this production",sh.character,"e.g. Layla")+'<p class="hint">Assign the character or part this person plays in this production.</p>'
       +rowBtns("Close","save-member","Save roles")+'<button class="btn danger block'+(sh.confirm?' armed':'')+'" data-act="remove-member">'+(sh.confirm?'Tap again to remove':'Remove from production')+'</button>';
   }
   else if(sh.type==="add-member"){
@@ -575,6 +590,7 @@ function handle(act, el){
       S.theme=effectiveTheme()==="dark"?"light":"dark";
       try{localStorage.setItem("manara-theme",S.theme);}catch(e){}
       render(); break;
+    case "language-toggle": S.lang=S.lang==="ar"?"en":"ar"; try{localStorage.setItem("manara-language",S.lang);}catch(e){} render(); break;
     case "tab": var nextTab=el.getAttribute("data-t"); if(nextTab!==S.tab) S.lastTab=S.tab; S.tab=nextTab; watchCurrentHighlights(); if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
     case "cal-mode": S.calMode=el.getAttribute("data-v"); render(); break;
     case "cal-day": S.calSelected=el.getAttribute("data-date"); render(); break;
@@ -616,12 +632,12 @@ function handle(act, el){
     case "pick-person": S.sheet.uid=el.getAttribute("data-id"); render(); break;
     case "pick-role": var role=el.getAttribute("data-r"), ix=S.sheet.role.indexOf(role); if(ix>-1) S.sheet.role.splice(ix,1); else S.sheet.role.push(role); render(); break;
     case "do-add-member": if(S.sheet.uid&&S.sheet.role.length){ p.members[S.sheet.uid]=S.sheet.role.slice(); saveProd(p).then(function(){ closeSheet(); }); } else { S.sheet.err="Choose a person and at least one role."; render(); } break;
-    case "member": openSheet({type:"member",uid:el.getAttribute("data-id"),roles:roleList(p.members[el.getAttribute("data-id")]).slice(),confirm:false}); break;
+    case "member": var memberId=el.getAttribute("data-id"); openSheet({type:"member",uid:memberId,roles:roleList(p.members[memberId]).slice(),character:(p.characters||{})[memberId]||"",confirm:false}); break;
     case "member-role": var mrole=el.getAttribute("data-r"), mix=S.sheet.roles.indexOf(mrole); if(mix>-1) S.sheet.roles.splice(mix,1); else S.sheet.roles.push(mrole); render(); break;
-    case "save-member": if(S.sheet.roles.length){p.members[S.sheet.uid]=S.sheet.roles.slice(); saveProd(p).then(function(){closeSheet();});}else{S.sheet.err="Choose at least one role.";render();} break;
+    case "save-member": if(S.sheet.roles.length){p.members[S.sheet.uid]=S.sheet.roles.slice();p.characters=p.characters||{};if((S.sheet.character||"").trim())p.characters[S.sheet.uid]=S.sheet.character.trim();else delete p.characters[S.sheet.uid];saveProd(p).then(function(){closeSheet();});}else{S.sheet.err="Choose at least one role.";render();} break;
     case "remove-member":
       if(!S.sheet.confirm){ S.sheet.confirm=true; render(); break; }
-      delete p.members[S.sheet.uid]; saveProd(p).then(function(){ closeSheet(); }); break;
+      delete p.members[S.sheet.uid]; if(p.characters)delete p.characters[S.sheet.uid]; saveProd(p).then(function(){ closeSheet(); }); break;
 
     case "new-user": openSheet({type:"new-user",name:"",username:"",code:"",isAdmin:false,err:"",created:null}); break;
     case "toggle-admin": S.sheet.isAdmin=!S.sheet.isAdmin; render(); break;
@@ -812,7 +828,7 @@ if(window.matchMedia){
 
 /* ===== boot ===== */
 async function boot(){
-  try{ var savedTheme=localStorage.getItem("manara-theme"); if(savedTheme==="light"||savedTheme==="dark") S.theme=savedTheme; }catch(e){}
+  try{ var savedTheme=localStorage.getItem("manara-theme"), savedLang=localStorage.getItem("manara-language"); if(savedTheme==="light"||savedTheme==="dark") S.theme=savedTheme; if(savedLang==="ar"||savedLang==="en")S.lang=savedLang; }catch(e){}
   render();
   try{
     var cfg=window.MANARA_FIREBASE;

@@ -25,6 +25,22 @@ service cloud.firestore {
       return isMember(pid) && exists(eventPath(pid, eid)) &&
         (canDirect(pid) || request.auth.uid in get(eventPath(pid, eid)).data.memberIds);
     }
+    function validPublicShow(sid) {
+      return request.resource.data.keys().hasOnly(
+          ['id', 'pid', 'kind', 'title', 'startsAt', 'productionName', 'updatedAt']) &&
+        request.resource.data.keys().hasAll(
+          ['id', 'pid', 'kind', 'title', 'startsAt', 'productionName']) &&
+        request.resource.data.pid is string &&
+        request.resource.data.id is string &&
+        sid == request.resource.data.pid + '_' + request.resource.data.id &&
+        request.resource.data.kind == 'show' &&
+        canDirect(request.resource.data.pid) &&
+        existsAfter(eventPath(request.resource.data.pid, request.resource.data.id)) &&
+        getAfter(eventPath(request.resource.data.pid, request.resource.data.id)).data.kind == 'show' &&
+        getAfter(eventPath(request.resource.data.pid, request.resource.data.id)).data.title == request.resource.data.title &&
+        getAfter(eventPath(request.resource.data.pid, request.resource.data.id)).data.startsAt == request.resource.data.startsAt &&
+        request.resource.data.productionName == prod(request.resource.data.pid).name;
+    }
 
     // First admin setup is allowed once; all later account creation is admin-controlled.
     match /meta/{doc} {
@@ -41,6 +57,15 @@ service cloud.firestore {
       allow update: if isAdmin() ||
         (request.auth.uid == uid && request.resource.data.isAdmin == resource.data.isAdmin);
       allow delete: if isAdmin();
+    }
+
+    // Public show listings contain no attendee IDs or RSVP data.
+    match /publicShows/{sid} {
+      allow read: if signedIn();
+      allow create, update: if validPublicShow(sid);
+      allow delete: if canDirect(resource.data.pid) &&
+        (!existsAfter(eventPath(resource.data.pid, resource.data.id)) ||
+         getAfter(eventPath(resource.data.pid, resource.data.id)).data.kind != 'show');
     }
 
     match /productions/{pid} {
@@ -99,7 +124,14 @@ service cloud.firestore {
 
       match /scripts/{sid} {
         allow read: if isMember(pid);
-        allow create, update, delete: if canDirect(pid);
+        allow create, update, delete: if canDirect(pid) || hasRole(pid, 'writer');
+
+        match /highlights/{uid} {
+          allow read: if isMember(pid) && request.auth.uid == uid;
+          allow create, update: if isMember(pid) && request.auth.uid == uid &&
+            request.resource.data.uid == uid && request.resource.data.highlights is list;
+          allow delete: if isMember(pid) && request.auth.uid == uid;
+        }
       }
     }
   }
