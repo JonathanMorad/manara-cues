@@ -12,9 +12,9 @@ function fail(code,msg){ var e = new Error(msg); e.code = code; return e; }
 /* ---------------- DEMO (localStorage) ---------------- */
 function makeDemo(){
   var KEY = "manara-demo-v2", SKEY = "manara-demo-v2-session", subs = [], authCbs = [];
-  function fresh(){ return {setup:false, users:{}, prods:{}, cues:{}, notes:{}, events:{}, responses:{}, scripts:{}}; }
+  function fresh(){ return {setup:false, users:{}, prods:{}, cues:{}, notes:{}, events:{}, responses:{}, scripts:{}, highlights:{}}; }
   function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || fresh(); }catch(e){ return fresh(); } }
-  var d = load();
+  var d = load(); d.highlights=d.highlights||{};
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} subs.slice().forEach(function(f){ f(); }); }
   function sess(){ try{ return localStorage.getItem(SKEY); }catch(e){ return null; } }
   function pub(u){ return u ? {uid:u.uid, username:u.username, name:u.name, isAdmin:!!u.isAdmin} : null; }
@@ -24,7 +24,7 @@ function makeDemo(){
   function byName(n){ for(var k in d.users) if(d.users[k].username===cleanUsername(n)) return d.users[k]; return null; }
   return {
     mode:"demo",
-    init:function(){ d = load(); return Promise.resolve({needsSetup: !d.setup}); },
+    init:function(){ d = load(); d.highlights=d.highlights||{}; return Promise.resolve({needsSetup: !d.setup}); },
     onAuth:function(cb){ authCbs.push(cb); setTimeout(function(){ cb(pub(d.users[sess()])); },0); },
     setupAdmin:function(o){
       if(d.setup) return Promise.reject(fail("already","Setup is already done."));
@@ -56,11 +56,14 @@ function makeDemo(){
     saveNote:function(pid, n){ d.notes[n.id] = Object.assign(plain(n), {pid:pid}); save(); return Promise.resolve(); },
     deleteNote:function(pid, id){ delete d.notes[id]; save(); return Promise.resolve(); },
     watchEvents:function(pid, user, cb){ return watch(function(){ return Object.keys(d.events).map(function(k){ return d.events[k]; }).filter(function(e){ return e.pid===pid && (user.isAdmin || (e.memberIds||[]).indexOf(user.uid)>-1); }); }, cb); },
+    watchPublicShows:function(cb){ return watch(function(){ return Object.keys(d.events).map(function(k){ return d.events[k]; }).filter(function(e){ return e.kind==="show"; }); }, cb); },
     saveEvent:function(pid, e){ d.events[e.id] = Object.assign(plain(e), {pid:pid}); save(); return Promise.resolve(); },
     deleteEvent:function(pid, id){ delete d.events[id]; Object.keys(d.responses).forEach(function(k){ if(k.indexOf(id+":")===0) delete d.responses[k]; }); save(); return Promise.resolve(); },
     watchResponses:function(pid, eid, cb){ return watch(function(){ return Object.keys(d.responses).map(function(k){ return d.responses[k]; }).filter(function(r){ return r.pid===pid && r.eid===eid; }); }, cb); },
     saveResponse:function(pid, eid, uid_, response){ d.responses[eid+":"+uid_] = {pid:pid,eid:eid,uid:uid_,response:response,updatedAt:Date.now()}; save(); return Promise.resolve(); },
     watchScripts:function(pid, cb){ return watch(function(){ return Object.keys(d.scripts).map(function(k){ return d.scripts[k]; }).filter(function(s){ return s.pid===pid; }); }, cb); },
+    watchHighlights:function(pid,sid,uid_,cb){ return watch(function(){ var h=d.highlights[pid+":"+sid+":"+uid_]; return h&&h.highlights||[]; },cb); },
+    saveHighlights:function(pid,sid,uid_,h){ d.highlights[pid+":"+sid+":"+uid_]={uid:uid_,highlights:plain(h),updatedAt:Date.now()}; save(); return Promise.resolve(); },
     saveScript:function(pid, s){ d.scripts[s.id] = Object.assign(plain(s), {pid:pid}); save(); return Promise.resolve(); },
     deleteScript:function(pid,id){ delete d.scripts[id]; save(); return Promise.resolve(); }
   };
@@ -146,17 +149,48 @@ async function makeFirebase(cfg){
     watchEvents:function(pid, user, cb){
       var c=F.collection(db,"productions",pid,"events");
       var q=user.isAdmin?c:F.query(c,F.where("memberIds","array-contains",user.uid));
-      return F.onSnapshot(q,function(s){ cb(docs(s)); },function(){});
+      return F.onSnapshot(q,function(s){ cb(docs(s).map(function(e){e.pid=pid;return e;})); },function(){});
     },
-    saveEvent:function(pid, e){ return wrap(F.setDoc(F.doc(db,"productions",pid,"events",e.id),plain(e))); },
+    watchPublicShows:function(cb){
+      var q=F.query(F.collection(db,"publicShows"),F.where("kind","==","show"));
+      return F.onSnapshot(q,function(s){cb(docs(s));},function(){});
+    },
+    syncPublicShows:function(prods){return wrap((async function(){
+      var batch=F.writeBatch(db), count=0;
+      for(var i=0;i<prods.length;i++){
+        var p=prods[i], snap=await F.getDocs(F.collection(db,"productions",p.id,"events"));
+        for(var j=0;j<snap.docs.length;j++){
+          var x=snap.docs[j], e=x.data();
+          if(e.kind==="show"){
+            batch.set(F.doc(db,"publicShows",p.id+"_"+(e.id||x.id)),{id:e.id||x.id,pid:p.id,kind:"show",title:e.title,startsAt:e.startsAt,productionName:p.name,updatedAt:e.updatedAt||Date.now()}); count++;
+            if(count>=400){await batch.commit();batch=F.writeBatch(db);count=0;}
+          }
+        }
+      }
+      if(count) await batch.commit();
+    })());},
+    saveEvent:function(pid,e){return wrap((async function(){
+      var b=F.writeBatch(db), eventRef=F.doc(db,"productions",pid,"events",e.id), publicRef=F.doc(db,"publicShows",pid+"_"+e.id);
+      b.set(eventRef,plain(e));
+      if(e.kind==="show") b.set(publicRef,{id:e.id,pid:pid,kind:"show",title:e.title,startsAt:e.startsAt,productionName:e.productionName||"",updatedAt:e.updatedAt||Date.now()});
+      else b.delete(publicRef);
+      return b.commit();
+    })());},
     deleteEvent:function(pid,id){ return wrap((async function(){
       var c=F.collection(db,"productions",pid,"events",id,"responses"), snap=await F.getDocs(c);
       await Promise.all(snap.docs.map(function(x){return F.deleteDoc(x.ref);}));
-      return F.deleteDoc(F.doc(db,"productions",pid,"events",id));
+      var b=F.writeBatch(db);b.delete(F.doc(db,"productions",pid,"events",id));b.delete(F.doc(db,"publicShows",pid+"_"+id));return b.commit();
     })()); },
     watchResponses:function(pid,eid,cb){ return F.onSnapshot(F.collection(db,"productions",pid,"events",eid,"responses"),function(s){ cb(docs(s)); },function(){}); },
     saveResponse:function(pid,eid,uid_,response){ return wrap(F.setDoc(F.doc(db,"productions",pid,"events",eid,"responses",uid_),{uid:uid_,response:response,updatedAt:Date.now()})); },
     watchScripts:function(pid,cb){ return F.onSnapshot(F.collection(db,"productions",pid,"scripts"),function(s){ cb(docs(s)); },function(){}); },
+    watchHighlights:function(pid,sid,uid_,cb){
+      var r=F.doc(db,"productions",pid,"scripts",sid,"highlights",uid_);
+      return F.onSnapshot(r,function(s){var d=s.exists()?s.data():{};cb(d.highlights||[]);},function(){});
+    },
+    saveHighlights:function(pid,sid,uid_,highlights){
+      return wrap(F.setDoc(F.doc(db,"productions",pid,"scripts",sid,"highlights",uid_),{uid:uid_,highlights:plain(highlights),updatedAt:Date.now()}));
+    },
     saveScript:function(pid,s){ return wrap(F.setDoc(F.doc(db,"productions",pid,"scripts",s.id),plain(s))); },
     deleteScript:function(pid,id){ return wrap(F.deleteDoc(F.doc(db,"productions",pid,"scripts",id))); }
   };

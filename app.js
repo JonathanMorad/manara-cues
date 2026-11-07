@@ -12,9 +12,9 @@ var SWATCHES = ["#FFFFFF","#FFD27A","#FF8A3D","#E5484D","#E255A1","#8E6BFF","#3E
 
 /* ===== state ===== */
 var DB = null;
-var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], responses:{}, scripts:[],
+var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, scripts:[], highlights:[],
   tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
-var unsub = {users:null, prods:null, cues:null, notes:null, events:null, scripts:null, responses:{}};
+var unsub = {users:null, prods:null, cues:null, notes:null, events:null, publicShows:null, highlights:null, scripts:null, responses:{}};
 
 /* ===== helpers ===== */
 function uid(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3); }
@@ -41,6 +41,13 @@ function sortedCues(dept){
   return S.cues.filter(function(c){ return c.dept===dept; }).sort(function(a,b){ return sceneIndex(a.sceneId)-sceneIndex(b.sceneId) || (a.order||0)-(b.order||0); });
 }
 function numberOf(c){ var list=sortedCues(c.dept); for(var i=0;i<list.length;i++) if(list[i].id===c.id) return (c.dept==="lighting"?"L":"Q")+(i+1); return "?"; }
+function watchCurrentHighlights(){
+  if(unsub.highlights){try{unsub.highlights();}catch(e){} unsub.highlights=null;}
+  S.highlights=[];
+  var p=prod(), sc=scene();
+  if(p&&sc&&S.user&&S.tab==="production"&&S.prodView==="script")
+    unsub.highlights=DB.watchHighlights(p.id,sc.id,S.user.uid,function(rows){S.highlights=rows||[];softRender();});
+}
 function toast(msg){ S.toast=msg; render(); setTimeout(function(){ if(S.toast===msg){ S.toast=""; render(); } },2600); }
 function err(e){ return (e&&e.message)||"Something went wrong."; }
 function absorb(p,label){ return p.catch(function(e){ toast((label||"Could not save")+": "+err(e)); }); }
@@ -118,14 +125,14 @@ function renderShell(){
     +'<div class="top-production"><small>Current production</small><b>'+esc(p?p.name:"No production selected")+'</b></div>'
     +'<button class="theme-toggle" data-act="theme-toggle" aria-label="Switch to '+(effectiveTheme()==="dark"?'light':'dark')+' mode">'+(effectiveTheme()==="dark"?'☼ Light':'◐ Dark')+'</button>'
     +'<button class="avatar" data-act="tab" data-t="team" aria-label="Your profile">'+esc(initials(S.user.name))+'</button></header>';
-  h+='<div class="workspace-layout"><aside class="production-sidebar"><div class="production-sidebar-title">Productions</div><nav class="production-list" aria-label="Choose a production">';
+  h+='<div class="production-selector-bar"><div class="production-sidebar-title">Productions</div><nav class="production-list" aria-label="Choose a production">';
   if(S.prods.length) S.prods.forEach(function(x){ h+='<button class="production-choice" data-act="switch-prod" data-id="'+esc(x.id)+'" aria-current="'+(x.id===S.pid)+'"><span class="production-indicator" aria-hidden="true"></span><span class="production-choice-name">'+esc(x.name)+'</span></button>'; });
   else h+='<p class="muted small sidebar-empty">No productions yet.</p>';
-  h+='</nav>'+(isAdmin()?'<button class="sidebar-new-production" data-act="new-prod">'+ic("plus",18)+' New production</button>':'')+'</aside><div class="workspace-main">';
+  h+='</nav>'+(isAdmin()?'<button class="sidebar-new-production" data-act="new-prod">'+ic("plus",18)+' New production</button>':'')+'</div><div class="workspace-layout"><div class="workspace-main">';
   h += '<main class="page'+(animate?' page-slide':'')+'" style="--slide-from:'+from+'" data-active-tab="'+S.tab+'">';
-  if(!p) h += renderNoProd();
+  if(S.tab==="calendar") h += renderCalendar(p);
+  else if(!p) h += renderNoProd();
   else if(S.tab==="home") h += renderHome(p);
-  else if(S.tab==="calendar") h += renderCalendar(p);
   else if(S.tab==="production") h += renderProduction(p);
   else h += renderTeam(p);
   h += '</main>';
@@ -150,15 +157,20 @@ function timeInputValue(ms){ var d=new Date(ms); return String(d.getHours()).pad
 function dayKey(ms){ return dateInputValue(ms); }
 function dateFromKey(key){ var a=String(key||"").split("-").map(Number); return new Date(a[0],a[1]-1,a[2]); }
 function calendarTitle(d){ return d.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
-function eventsOn(key){ return S.events.filter(function(e){ return dayKey(e.startsAt)===key; }).sort(function(a,b){return a.startsAt-b.startsAt;}); }
-function nextEvent(){ return S.events.filter(function(e){ return e.startsAt>=Date.now(); }).sort(function(a,b){ return a.startsAt-b.startsAt; })[0]||null; }
+function allVisibleEvents(){
+  var all={}, rows=(S.publicShows||[]).concat(S.events||[]);
+  rows.forEach(function(e){var key=(e.pid||S.pid||"")+":"+e.id;all[key]=e;});
+  return Object.keys(all).map(function(k){return all[k];});
+}
+function eventsOn(key){ return allVisibleEvents().filter(function(e){ return dayKey(e.startsAt)===key; }).sort(function(a,b){return a.startsAt-b.startsAt;}); }
+function nextEvent(pid){ return allVisibleEvents().filter(function(e){ return (!pid||(e.pid||S.pid)===pid)&&e.startsAt>=Date.now(); }).sort(function(a,b){ return a.startsAt-b.startsAt; })[0]||null; }
 function renderHome(p){
   var r=myRoles(), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).sort(function(a,b){ return b.at-a.at; }).slice(0,3), next=nextEvent();
   var h='<h1 class="h1">Hi, '+esc(S.user.name.split(" ")[0])+'</h1>';
   h+='<div class="card"><div class="row"><h3 class="grow">'+esc(p.name)+'</h3><span class="badge">'+esc(r.length?roleLabel(r):(isAdmin()?"Admin":"Member"))+'</span></div>'
     +'<p class="muted small">'+p.scenes.length+(p.scenes.length===1?' scene':' scenes')+' · '+(p.memberIds||[]).length+' people</p></div>';
   h+='<div class="card"><div class="row"><h3 class="grow">Coming up</h3><button class="small muted" data-act="tab" data-t="calendar">Calendar</button></div>';
-  if(next){ var days=daysUntil(next.startsAt); h+='<b>'+esc(next.title)+'</b><p class="muted small">'+esc(dateLabel(next.startsAt))+' · '+(days===0?'Today':days===1?'Tomorrow':'In '+days+' days')+'</p>'; }
+  if(next){ var days=daysUntil(next.startsAt), scope=next.pid&&next.pid!==S.pid?(next.productionName||"Another production")+' · ':''; h+='<b>'+esc(next.title)+'</b><p class="muted small">'+esc(scope+dateLabel(next.startsAt))+' · '+(days===0?'Today':days===1?'Tomorrow':'In '+days+' days')+'</p>'; }
   else h+='<p class="muted">No upcoming dates yet.</p>';
   h+='</div>';
   h+='<div class="card"><h3>Notes for you</h3>';
@@ -192,7 +204,7 @@ function renderProduction(p){
   return h+'<div class="prod-tab-content'+(changed?' prod-tab-slide':'')+'" style="--slide-from:'+from+'">'+content+'</div>';
 }
 function renderProductionOverview(p){
-  var upcoming=nextEvent(), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).length;
+  var upcoming=nextEvent(p.id), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).length;
   var h='<div class="card"><div class="row"><h3 class="grow">Your part</h3><span class="badge">'+esc(roleLabel(myRoles())||(isAdmin()?"Admin":"Member"))+'</span></div><p class="muted small">'+p.scenes.length+(p.scenes.length===1?' scene':' scenes')+' · '+(p.memberIds||[]).length+' people</p></div>';
   h+='<div class="card"><h3>Next date</h3>'+(upcoming?'<b>'+esc(upcoming.title)+'</b><p class="muted small">'+esc(dateLabel(upcoming.startsAt))+' · '+(daysUntil(upcoming.startsAt)===0?'Today':daysUntil(upcoming.startsAt)===1?'Tomorrow':'In '+daysUntil(upcoming.startsAt)+' days')+'</p>':'<p class="muted">Nothing scheduled yet.</p>')+'<button class="btn" data-act="tab" data-t="calendar">Open calendar</button></div>';
   h+='<div class="card"><h3>Production materials</h3><p class="muted">Read the script, your role cues, and rehearsal notes in one place.</p><div class="sheetrow"><button class="btn" data-act="prod-view" data-v="script">Script</button><button class="btn" data-act="prod-view" data-v="cues">Cues</button></div><button class="btn" data-act="prod-view" data-v="notes">'+mine+' note'+(mine===1?'':'s')+' for you</button></div>';
@@ -203,16 +215,29 @@ function renderScript(p){
   var s=scene(), doc=s&&S.scripts.filter(function(x){ return x.id===s.id; })[0], h='<h2 class="section-title">Script</h2>';
   if(!s) return h+'<div class="empty">Add a scene to start the script.</div>';
   h+='<div class="card script-card"><div class="row"><b class="grow">'+esc(s.name)+'</b>'+(isDirector()?'<button class="btn" data-act="edit-script" data-id="'+s.id+'">'+(doc?'Edit':'Add text')+'</button>':'')+'</div>';
-  h+=doc&&doc.text?'<pre class="script-text">'+esc(doc.text)+'</pre>':'<p class="muted">The director has not added this scene’s script yet.</p>';
+  h+=doc&&doc.text?'<div class="highlight-tools"><span class="hint">Select text, then choose a color. Only you can see your highlights.</span><div class="highlight-colors">'+[['yellow','Yellow'],['green','Green'],['pink','Pink'],['blue','Blue']].map(function(x){return '<button class="highlight-color '+x[0]+'" data-act="script-highlight" data-color="'+x[0]+'" aria-label="Highlight selected text '+x[1].toLowerCase()+'">'+x[1]+'</button>';}).join('')+(S.highlights.length?'<button class="highlight-clear" data-act="clear-highlights">Clear mine</button>':'')+'</div></div><pre id="script-body" class="script-text">'+renderHighlightedScript(doc.text,S.highlights)+'</pre>':'<p class="muted">The director has not added this scene’s script yet.</p>';
   if(doc&&doc.updatedAt) h+='<p class="hint">Updated '+esc(dateLabel(doc.updatedAt))+'</p>';
   return h+'</div>';
+}
+function renderHighlightedScript(text,highlights){
+  var allowed={yellow:1,green:1,pink:1,blue:1}, valid=(highlights||[]).filter(function(x){return x&&Number.isInteger(x.start)&&Number.isInteger(x.end)&&x.start>=0&&x.end>x.start&&x.end<=text.length&&allowed[x.color]&&(!x.quote||x.quote===text.slice(x.start,x.end));}).sort(function(a,b){return a.start-b.start||a.end-b.end;}), out="", pos=0;
+  valid.forEach(function(x){if(x.start<pos)return;out+=esc(text.slice(pos,x.start))+'<mark class="script-highlight '+x.color+'">'+esc(text.slice(x.start,x.end))+'</mark>';pos=x.end;});
+  return out+esc(text.slice(pos));
+}
+function selectedScriptRange(){
+  var body=document.getElementById("script-body"), selection=window.getSelection();
+  if(!body||!selection||selection.isCollapsed||!body.contains(selection.anchorNode)||!body.contains(selection.focusNode)) return null;
+  var range=selection.getRangeAt(0), before=document.createRange(), through=document.createRange();
+  before.selectNodeContents(body); before.setEnd(range.startContainer,range.startOffset);
+  through.selectNodeContents(body); through.setEnd(range.endContainer,range.endOffset);
+  return {start:before.toString().length,end:through.toString().length};
 }
 function renderCalendar(p){
   var now=new Date(), today=dayKey(now.getTime());
   if(!S.calMonth) S.calMonth=new Date(now.getFullYear(),now.getMonth(),1);
   if(!S.calSelected) S.calSelected=today;
   var m=S.calMonth, first=new Date(m.getFullYear(),m.getMonth(),1), offset=first.getDay(), total=new Date(m.getFullYear(),m.getMonth()+1,0).getDate(), cells=Math.ceil((offset+total)/7)*7;
-  var all=S.events.slice().sort(function(a,b){return a.startsAt-b.startsAt;}), h='<div class="row"><h1 class="h1 grow">Calendar</h1>'+(isDirector()?'<button class="btn primary" data-act="new-event">'+ic("plus",18)+' Add date</button>':'')+'</div>';
+  var all=allVisibleEvents().sort(function(a,b){return a.startsAt-b.startsAt;}), h='<div class="row"><h1 class="h1 grow">Calendar</h1>'+(p&&isDirector()?'<button class="btn primary" data-act="new-event">'+ic("plus",18)+' Add date</button>':'')+'</div>';
   h+='<div class="cal-legend"><span><i class="rehearsal"></i> Rehearsal</span><span><i class="show"></i> Production / show</span></div>';
   h+='<div class="seg cal-mode" role="group" aria-label="Calendar view"><button data-act="cal-mode" data-v="month" aria-pressed="'+(S.calMode==="month")+'">Month</button><button data-act="cal-mode" data-v="agenda" aria-pressed="'+(S.calMode==="agenda")+'">Agenda</button></div>';
   if(S.calMode==="month"){
@@ -237,11 +262,14 @@ function renderCalendar(p){
 function renderCalendarEvent(e){
   var rs=S.responses[e.id]||[], yes=rs.filter(function(r){return r.response==="going";}).length, no=rs.filter(function(r){return r.response==="not-going";}).length;
   var mine=rs.filter(function(r){return r.uid===S.user.uid;})[0], invite=(e.memberIds||[]).indexOf(S.user.uid)>-1, days=daysUntil(e.startsAt), show=e.kind==="show";
-  var h='<article class="card event-card '+(show?'event-show':'event-rehearsal')+'"><div class="row"><span class="event-kind '+(show?'show':'rehearsal')+'"><i></i>'+(show?'Production / show':'Rehearsal')+'</span><span class="grow"></span>'+(isDirector()?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
-  h+='<h3>'+esc(e.title)+'</h3><p class="muted small">'+esc(dateLabel(e.startsAt))+'</p><b class="countdown">'+(days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days away')+'</b>';
-  h+='<p class="muted small">'+yes+' going · '+no+' can’t make it</p>';
-  if(invite) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going")+'">I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going")+'">Can’t make it</button></div>';
-  else h+='<p class="hint">This date is for selected team members.</p>';
+  var eventProd=S.prods.filter(function(x){return x.id===e.pid;})[0], canManage=isDirector()&&(!e.pid||e.pid===S.pid), canRespond=invite&&!!eventProd;
+  var context=e.productionName||(eventProd&&eventProd.name), otherProd=e.pid&&e.pid!==S.pid;
+  var h='<article class="card event-card '+(show?'event-show':'event-rehearsal')+'"><div class="row"><span class="event-kind '+(show?'show':'rehearsal')+'"><i></i>'+(show?'Production / show':'Rehearsal')+'</span><span class="grow"></span>'+(canManage?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
+  h+='<h3>'+esc(e.title)+'</h3><p class="muted small">'+esc(dateLabel(e.startsAt))+(otherProd&&context?' · '+esc(context):'')+'</p><b class="countdown">'+(days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days away')+'</b>';
+  if(canRespond||isAdmin()) h+='<p class="muted small">'+yes+' going · '+no+' can’t make it</p>';
+  if(canRespond) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going")+'">I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going")+'">Can’t make it</button></div>';
+  else if(show) h+='<p class="hint">Visible to all Manara users. RSVPs are for members of this production.</p>';
+  else h+='<p class="hint">This rehearsal is for selected members of this production.</p>';
   return h+'</article>';
 }
 
@@ -432,9 +460,9 @@ function renderSheet(){
       +'<div class="seg"><button data-act="event-kind" data-k="rehearsal" aria-pressed="'+(sh.kind==="rehearsal")+'">Rehearsal</button><button data-act="event-kind" data-k="show" aria-pressed="'+(sh.kind==="show")+'">Production</button></div>'
       +field("eventTitle","Name",sh.title,"e.g. Full cast rehearsal")
       +field("eventDate","Date",sh.date,"",{type:"date"})+field("eventTime","Time",sh.time,"",{type:"time"})
-      +'<div class="field"><label>Who should see this date?</label><div class="sheetrow"><button class="btn" data-act="event-all">Everyone</button><button class="btn" data-act="event-none">Clear selection</button></div><div class="chips attendee-list">'
+      +'<div class="field"><label>'+(sh.kind==="show"?'Who can RSVP?':'Who should see this rehearsal?')+'</label><div class="sheetrow"><button class="btn" data-act="event-all">All production members</button><button class="btn" data-act="event-none">Clear selection</button></div><div class="chips attendee-list">'
       +Object.keys(p.members||{}).filter(function(id){return roleList(p.members[id]).indexOf("director")===-1;}).map(function(id){ return '<button class="chip" data-act="event-attendee" data-id="'+id+'" aria-pressed="'+(sh.memberIds.indexOf(id)>-1)+'">'+esc(nameOf(id))+'</button>'; }).join('')
-      +'</div><p class="hint">Directors are always included. Unselected members will not see this date.</p></div>'
+      +'</div><p class="hint">'+(sh.kind==="show"?'Show dates are visible to all Manara users. Only selected production members can RSVP.':'Only selected people in this production can see this rehearsal. Directors are always included.')+'</p></div>'
       +(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')+rowBtns("Cancel","save-event","Save date");
   }
   else if(sh.type==="code"){
@@ -467,41 +495,54 @@ function setDraft(k,v){
 
 /* ===== data wiring ===== */
 function stopAll(){
-  ["users","prods","cues","notes","events","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
+  ["users","prods","cues","notes","events","publicShows","highlights","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
   Object.keys(unsub.responses||{}).forEach(function(k){ try{unsub.responses[k]();}catch(e){} }); unsub.responses={};
 }
 function watchEventResponses(pid,events){
-  var wanted={}; events.forEach(function(e){wanted[e.id]=true;});
-  Object.keys(unsub.responses).forEach(function(id){ if(!wanted[id]){ try{unsub.responses[id]();}catch(e){} delete unsub.responses[id]; delete S.responses[id]; } });
-  events.forEach(function(e){ if(!unsub.responses[e.id]) unsub.responses[e.id]=DB.watchResponses(pid,e.id,function(list){ S.responses[e.id]=list; softRender(); }); });
+  var wanted={};
+  events.forEach(function(e){
+    var eventPid=e.pid||pid, member=S.prods.some(function(x){return x.id===eventPid;});
+    if(isAdmin()||(member&&(e.memberIds||[]).indexOf(S.user.uid)>-1)) wanted[eventPid+":"+e.id]=e;
+  });
+  Object.keys(unsub.responses).forEach(function(key){ if(!wanted[key]){ try{unsub.responses[key]();}catch(e){} delete unsub.responses[key]; delete S.responses[key.split(":").pop()]; } });
+  Object.keys(wanted).forEach(function(key){ var e=wanted[key], eventPid=e.pid||pid; if(!unsub.responses[key]) unsub.responses[key]=DB.watchResponses(eventPid,e.id,function(list){ S.responses[e.id]=list; softRender(); }); });
 }
 function startWatch(){
   stopAll();
+  var syncedProds="";
   unsub.users=DB.watchUsers(function(l){ S.users=l; softRender(); });
+  unsub.publicShows=DB.watchPublicShows(function(l){ S.publicShows=l; watchEventResponses(S.pid,allVisibleEvents()); softRender(); });
   unsub.prods=DB.watchProductions(S.user,function(l){
     S.prods=l;
+    var prodSignature=l.map(function(x){return x.id+":"+x.name;}).sort().join("|");
+    if(isAdmin()&&prodSignature&&prodSignature!==syncedProds){
+      syncedProds=prodSignature;
+      DB.syncPublicShows(l).catch(function(e){syncedProds="";toast("Could not update the shared show dates: "+err(e));});
+    }
     var saved=null; try{ saved=localStorage.getItem("manara-pid"); }catch(e){}
     if(!prod()){ var pick=l.filter(function(x){ return x.id===saved; })[0]||l[0]; selectProd(pick?pick.id:null); }
+    watchEventResponses(S.pid,allVisibleEvents());
     softRender();
   });
 }
 function selectProd(id){
-  S.pid=id; S.cues=[]; S.notes=[]; S.events=[]; S.responses={}; S.scripts=[]; S.sceneId=null; S.live=null;
+  S.pid=id; S.cues=[]; S.notes=[]; S.events=[]; S.responses={}; S.scripts=[]; S.highlights=[]; S.sceneId=null; S.live=null;
   try{ if(id) localStorage.setItem("manara-pid",id); }catch(e){}
-  ["cues","notes","events","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
+  ["cues","notes","events","highlights","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
   Object.keys(unsub.responses||{}).forEach(function(k){try{unsub.responses[k]();}catch(e){}}); unsub.responses={};
   if(id && S.user){
     unsub.cues=DB.watchCues(id,function(l){ S.cues=l; softRender(); });
     unsub.notes=DB.watchNotes(id,S.user.uid,function(l){ S.notes=l; softRender(); });
-    unsub.events=DB.watchEvents(id,S.user,function(l){ S.events=l; watchEventResponses(id,l); softRender(); });
+    unsub.events=DB.watchEvents(id,S.user,function(l){ S.events=l; watchEventResponses(id,allVisibleEvents()); softRender(); });
     unsub.scripts=DB.watchScripts(id,function(l){ S.scripts=l; softRender(); });
   }
+  watchCurrentHighlights();
 }
 function onUser(u){
   var fresh = u && (!S.user || S.user.uid!==u.uid);
   S.user=u; S.ready=true; S.busy=false; if(u) S.form={};
   if(fresh){ S.tab="home"; S.prodView="overview"; S.dept="all"; S.sceneId=null; S.live=null; S.sheet=null; }
-  if(u){ S.authErr=""; startWatch(); } else { stopAll(); S.prods=[]; S.cues=[]; S.notes=[]; S.events=[]; S.scripts=[]; S.responses={}; S.users=[]; S.pid=null; S.live=null; S.sheet=null; }
+  if(u){ S.authErr=""; startWatch(); } else { stopAll(); S.prods=[]; S.cues=[]; S.notes=[]; S.events=[]; S.publicShows=[]; S.highlights=[]; S.scripts=[]; S.responses={}; S.users=[]; S.pid=null; S.live=null; S.sheet=null; }
   render();
 }
 function saveProd(p){
@@ -534,15 +575,15 @@ function handle(act, el){
       S.theme=effectiveTheme()==="dark"?"light":"dark";
       try{localStorage.setItem("manara-theme",S.theme);}catch(e){}
       render(); break;
-    case "tab": var nextTab=el.getAttribute("data-t"); if(nextTab!==S.tab) S.lastTab=S.tab; S.tab=nextTab; if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
+    case "tab": var nextTab=el.getAttribute("data-t"); if(nextTab!==S.tab) S.lastTab=S.tab; S.tab=nextTab; watchCurrentHighlights(); if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
     case "cal-mode": S.calMode=el.getAttribute("data-v"); render(); break;
     case "cal-day": S.calSelected=el.getAttribute("data-date"); render(); break;
     case "cal-nav": var dm=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+parseInt(el.getAttribute("data-d"),10),1); S.calMonth=dm; S.calSelected=dayKey(dm.getTime()); render(); break;
     case "cal-today": var td=new Date(); S.calMonth=new Date(td.getFullYear(),td.getMonth(),1); S.calSelected=dayKey(td.getTime()); render(); break;
-    case "prod-view": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView=el.getAttribute("data-v"); render(); window.scrollTo(0,0); break;
-    case "go-notes": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView="notes"; render(); break;
+    case "prod-view": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView=el.getAttribute("data-v"); watchCurrentHighlights(); render(); window.scrollTo(0,0); break;
+    case "go-notes": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView="notes"; watchCurrentHighlights(); render(); break;
     case "dept": S.dept=el.getAttribute("data-d"); render(); break;
-    case "scene": S.sceneId=el.getAttribute("data-id"); render(); break;
+    case "scene": S.sceneId=el.getAttribute("data-id"); watchCurrentHighlights(); render(); break;
     case "prod-menu": openSheet({type:"prod-menu"}); break;
     case "switch-prod": selectProd(el.getAttribute("data-id")); S.sheet=null; render(); break;
 
@@ -654,6 +695,25 @@ function handle(act, el){
       if(!isDirector()) break;
       if((S.sheet.text||"").length>200000){S.sheet.err="This scene’s script is too long. Split it across scenes.";render();break;}
       absorb(DB.saveScript(p.id,{id:S.sheet.sceneId,sceneId:S.sheet.sceneId,text:S.sheet.text||"",updatedBy:S.user.uid,updatedAt:Date.now()}),"Could not save script").then(function(){closeSheet();}); break;
+    case "script-highlight":
+      var sel=S.pendingHighlight||selectedScriptRange(), shade=el.getAttribute("data-color"), activeScene=scene(), activeScript=activeScene&&S.scripts.filter(function(x){return x.id===activeScene.id;})[0];
+      S.pendingHighlight=null;
+      if(!sel||!activeScript){toast("Select some script text first.");break;}
+      if(sel.end-sel.start>20000){toast("Choose a shorter passage to highlight.");break;}
+      var snippet=activeScript.text.slice(sel.start,sel.end), updated=[];
+      S.highlights.forEach(function(mark){
+        if(mark.end<=sel.start||mark.start>=sel.end) updated.push(mark);
+        else{
+          if(mark.start<sel.start) updated.push(Object.assign({},mark,{end:sel.start,quote:activeScript.text.slice(mark.start,sel.start)}));
+          if(mark.end>sel.end) updated.push(Object.assign({},mark,{start:sel.end,quote:activeScript.text.slice(sel.end,mark.end)}));
+        }
+      });
+      updated.push({start:sel.start,end:sel.end,color:shade,quote:snippet});
+      updated.sort(function(a,b){return a.start-b.start;}); S.highlights=updated; render();
+      absorb(DB.saveHighlights(p.id,activeScene.id,S.user.uid,updated),"Could not save your highlights"); break;
+    case "clear-highlights":
+      var clearScene=scene(); if(!clearScene) break; S.highlights=[]; render();
+      absorb(DB.saveHighlights(p.id,clearScene.id,S.user.uid,[]),"Could not clear your highlights"); break;
 
     case "new-event": openSheet({type:"event",kind:"rehearsal",title:"",date:dateInputValue(Date.now()+86400000),time:"19:00",memberIds:Object.keys(p.members||{}),err:""}); break;
     case "edit-event":
@@ -672,14 +732,16 @@ function handle(act, el){
       var directors=Object.keys(p.members||{}).filter(function(id){return roleList(p.members[id]).indexOf("director")>-1;});
       var chosen=directors.concat(es.memberIds||[]).filter(function(id,i,a){return a.indexOf(id)===i&&(p.memberIds||[]).indexOf(id)>-1;});
       if(!chosen.length){es.err="Choose at least one person to see this date.";render();break;}
-      absorb(DB.saveEvent(p.id,{id:es.id||uid(),kind:es.kind,title:es.title.trim(),startsAt:start,memberIds:chosen,createdBy:es.id?(S.events.filter(function(x){return x.id===es.id;})[0]||{}).createdBy||S.user.uid:S.user.uid,updatedAt:Date.now()}),"Could not save date").then(function(){closeSheet();}); break;
+      absorb(DB.saveEvent(p.id,{id:es.id||uid(),pid:p.id,productionName:p.name,kind:es.kind,title:es.title.trim(),startsAt:start,memberIds:chosen,createdBy:es.id?(S.events.filter(function(x){return x.id===es.id;})[0]||{}).createdBy||S.user.uid:S.user.uid,updatedAt:Date.now()}),"Could not save date").then(function(){closeSheet();}); break;
     case "del-event":
       var eid=el.getAttribute("data-id");
       if(S.confirmEventDelete!==eid){S.confirmEventDelete=eid;render();break;}
       S.confirmEventDelete=null; absorb(DB.deleteEvent(p.id,eid),"Could not delete date"); break;
     case "rsvp":
       var reid=el.getAttribute("data-id"), rv=el.getAttribute("data-r");
-      absorb(DB.saveResponse(p.id,reid,S.user.uid,rv),"Could not save your reply"); break;
+      var replyEvent=allVisibleEvents().filter(function(x){return x.id===reid;})[0], replyPid=replyEvent&&replyEvent.pid||p.id;
+      if(!replyEvent||!replyEvent.memberIds||replyEvent.memberIds.indexOf(S.user.uid)===-1){toast("Only invited production members can reply to this date.");break;}
+      absorb(DB.saveResponse(replyPid,reid,S.user.uid,rv),"Could not save your reply"); break;
 
     case "open-live":
       var dd=myDepts(); if(!dd.length){ toast("Live mode is for sound and lighting."); break; }
@@ -698,6 +760,10 @@ function handle(act, el){
 
 /* ===== events: taps (pointer + click, de-duplicated), typing, keyboard ===== */
 var lastFire=0, lastEl=null, swallowUntil=0;
+document.addEventListener("pointerdown",function(ev){
+  var button=ev.target&&ev.target.closest?ev.target.closest('[data-act="script-highlight"]'):null;
+  if(button) S.pendingHighlight=selectedScriptRange();
+});
 function fire(ev,viaTap){
   var el=ev.target&&ev.target.closest?ev.target.closest("[data-act]"):null;
   if(!el||el.disabled) return;
