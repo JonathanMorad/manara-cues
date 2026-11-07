@@ -13,7 +13,7 @@ var SWATCHES = ["#FFFFFF","#FFD27A","#FF8A3D","#E5484D","#E255A1","#8E6BFF","#3E
 /* ===== state ===== */
 var DB = null;
 var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], responses:{}, scripts:[],
-  tab:"home", prodView:"overview", calMonth:null, calSelected:"", calMode:"month", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
+  tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
 var unsub = {users:null, prods:null, cues:null, notes:null, events:null, scripts:null, responses:{}};
 
 /* ===== helpers ===== */
@@ -44,6 +44,13 @@ function numberOf(c){ var list=sortedCues(c.dept); for(var i=0;i<list.length;i++
 function toast(msg){ S.toast=msg; render(); setTimeout(function(){ if(S.toast===msg){ S.toast=""; render(); } },2600); }
 function err(e){ return (e&&e.message)||"Something went wrong."; }
 function absorb(p,label){ return p.catch(function(e){ toast((label||"Could not save")+": "+err(e)); }); }
+function effectiveTheme(){ return S.theme==="system"?((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"):S.theme; }
+function applyTheme(){
+  if(S.theme==="system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme",S.theme);
+  var meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content=effectiveTheme()==="dark"?"#111214":"#F1F0ED";
+}
 
 /* ===== logo ===== */
 function logo(size){
@@ -66,6 +73,7 @@ function ic(n,sz){ sz=sz||22; return '<svg width="'+sz+'" height="'+sz+'" viewBo
 
 /* ===== render ===== */
 function render(){
+  applyTheme();
   var app=document.getElementById("app"), y=window.scrollY;
   var h;
   if(S.fatal) h = renderFatal();
@@ -104,10 +112,17 @@ function renderSetup(){
 
 function renderShell(){
   var p=prod(), h='';
+  var order=["home","calendar","production","team"], prior=order.indexOf(S.lastTab), now=order.indexOf(S.tab);
+  var animate=!!(S.lastTab&&S.lastTab!==S.tab), from=prior<now?"18px":"-18px";
   h += '<header class="top">'+logo(40)
-    +'<button class="prodbtn" data-act="prod-menu" aria-label="Choose production"><span class="l"><small>Production</small><b>'+esc(p?p.name:"No production")+'</b></span>'+ic("chev",18)+'</button>'
+    +'<div class="top-production"><small>Current production</small><b>'+esc(p?p.name:"No production selected")+'</b></div>'
+    +'<button class="theme-toggle" data-act="theme-toggle" aria-label="Switch to '+(effectiveTheme()==="dark"?'light':'dark')+' mode">'+(effectiveTheme()==="dark"?'☼ Light':'◐ Dark')+'</button>'
     +'<button class="avatar" data-act="tab" data-t="team" aria-label="Your profile">'+esc(initials(S.user.name))+'</button></header>';
-  h += '<main class="page">';
+  h+='<div class="workspace-layout"><aside class="production-sidebar"><div class="production-sidebar-title">Productions</div><nav class="production-list" aria-label="Choose a production">';
+  if(S.prods.length) S.prods.forEach(function(x){ h+='<button class="production-choice" data-act="switch-prod" data-id="'+esc(x.id)+'" aria-current="'+(x.id===S.pid)+'"><span class="production-indicator" aria-hidden="true"></span><span class="production-choice-name">'+esc(x.name)+'</span></button>'; });
+  else h+='<p class="muted small sidebar-empty">No productions yet.</p>';
+  h+='</nav>'+(isAdmin()?'<button class="sidebar-new-production" data-act="new-prod">'+ic("plus",18)+' New production</button>':'')+'</aside><div class="workspace-main">';
+  h += '<main class="page'+(animate?' page-slide':'')+'" style="--slide-from:'+from+'" data-active-tab="'+S.tab+'">';
   if(!p) h += renderNoProd();
   else if(S.tab==="home") h += renderHome(p);
   else if(S.tab==="calendar") h += renderCalendar(p);
@@ -118,6 +133,8 @@ function renderShell(){
   if(p && S.tab==="production" && S.prodView==="notes") h += '<button class="fab" data-act="add-note">'+ic("plus",20)+' Add note</button>';
   h += '<nav class="tabs" aria-label="Main">'
     + tab("home","Home","home")+tab("calendar","Calendar","cal")+tab("production","Production","script")+tab("team","Team","team")+'</nav>';
+  h+='</div></div>';
+  S.lastTab=null;
   return h;
 }
 function tab(id,label,icon){ return '<button class="tab" data-act="tab" data-t="'+id+'" aria-current="'+(S.tab===id)+'">'+ic(icon,22)+'<span>'+label+'</span></button>'; }
@@ -165,10 +182,14 @@ function renderProduction(p){
   var h='<h1 class="h1">'+esc(p.name)+'</h1><div class="seg workspace-tabs" role="tablist" aria-label="Production pages">';
   views.forEach(function(v){ h+='<button role="tab" data-act="prod-view" data-v="'+v[0]+'" aria-selected="'+(S.prodView===v[0])+'">'+v[1]+'</button>'; });
   h+='</div>';
-  if(S.prodView==="overview") return h+renderProductionOverview(p);
-  if(S.prodView==="script") return h+sceneChips(p)+renderScript(p);
-  if(S.prodView==="cues") return h+sceneChips(p)+renderCues(p);
-  return h+sceneChips(p)+renderNotes(p,scene());
+  var order=["overview","script","cues","notes"], changed=!!(S.lastProdView&&S.lastProdView!==S.prodView);
+  var from=order.indexOf(S.prodView)>=order.indexOf(S.lastProdView)?"16px":"-16px", content="";
+  if(S.prodView==="overview") content=renderProductionOverview(p);
+  else if(S.prodView==="script") content=sceneChips(p)+renderScript(p);
+  else if(S.prodView==="cues") content=sceneChips(p)+renderCues(p);
+  else content=sceneChips(p)+renderNotes(p,scene());
+  S.lastProdView=null;
+  return h+'<div class="prod-tab-content'+(changed?' prod-tab-slide':'')+'" style="--slide-from:'+from+'">'+content+'</div>';
 }
 function renderProductionOverview(p){
   var upcoming=nextEvent(), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).length;
@@ -509,13 +530,17 @@ function handle(act, el){
       DB.setupAdmin({name:nm.trim(),username:un,code:cd}).then(function(){ S.needsSetup=false; }).catch(function(e){ S.busy=false; S.authErr=err(e); render(); });
       break;
     case "logout": DB.logout(); break;
-    case "tab": S.tab=el.getAttribute("data-t"); if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
+    case "theme-toggle":
+      S.theme=effectiveTheme()==="dark"?"light":"dark";
+      try{localStorage.setItem("manara-theme",S.theme);}catch(e){}
+      render(); break;
+    case "tab": var nextTab=el.getAttribute("data-t"); if(nextTab!==S.tab) S.lastTab=S.tab; S.tab=nextTab; if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
     case "cal-mode": S.calMode=el.getAttribute("data-v"); render(); break;
     case "cal-day": S.calSelected=el.getAttribute("data-date"); render(); break;
     case "cal-nav": var dm=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+parseInt(el.getAttribute("data-d"),10),1); S.calMonth=dm; S.calSelected=dayKey(dm.getTime()); render(); break;
     case "cal-today": var td=new Date(); S.calMonth=new Date(td.getFullYear(),td.getMonth(),1); S.calSelected=dayKey(td.getTime()); render(); break;
-    case "prod-view": S.tab="production"; S.prodView=el.getAttribute("data-v"); render(); window.scrollTo(0,0); break;
-    case "go-notes": S.tab="production"; S.prodView="notes"; render(); break;
+    case "prod-view": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView=el.getAttribute("data-v"); render(); window.scrollTo(0,0); break;
+    case "go-notes": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView="notes"; render(); break;
     case "dept": S.dept=el.getAttribute("data-d"); render(); break;
     case "scene": S.sceneId=el.getAttribute("data-id"); render(); break;
     case "prod-menu": openSheet({type:"prod-menu"}); break;
@@ -712,9 +737,16 @@ document.addEventListener("keydown",function(ev){
 });
 function fitView(){ var v=window.visualViewport; if(!v) return; var r=document.documentElement.style; r.setProperty("--vvh",v.height+"px"); r.setProperty("--vvt",v.offsetTop+"px"); }
 if(window.visualViewport){ window.visualViewport.addEventListener("resize",fitView); window.visualViewport.addEventListener("scroll",fitView); fitView(); }
+if(window.matchMedia){
+  var colorScheme=window.matchMedia("(prefers-color-scheme: dark)");
+  var onSystemTheme=function(){ if(S.theme==="system") render(); };
+  if(colorScheme.addEventListener) colorScheme.addEventListener("change",onSystemTheme);
+  else if(colorScheme.addListener) colorScheme.addListener(onSystemTheme);
+}
 
 /* ===== boot ===== */
 async function boot(){
+  try{ var savedTheme=localStorage.getItem("manara-theme"); if(savedTheme==="light"||savedTheme==="dark") S.theme=savedTheme; }catch(e){}
   render();
   try{
     var cfg=window.MANARA_FIREBASE;
