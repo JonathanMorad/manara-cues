@@ -59,6 +59,27 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /notifications/{nid} {
+      allow read: if signedIn() &&
+        (resource.data.to == request.auth.uid || canDirect(resource.data.pid));
+      allow create: if canDirect(request.resource.data.pid) &&
+        request.resource.data.keys().hasOnly(
+          ['id', 'type', 'pid', 'to', 'from', 'senderName', 'productionName', 'roles', 'character', 'status', 'read', 'createdAt']) &&
+        request.resource.data.id == nid &&
+        request.resource.data.type == 'production_invite' &&
+        request.resource.data.from == request.auth.uid &&
+        request.resource.data.to in prod(request.resource.data.pid).memberIds &&
+        request.resource.data.roles is list &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.read == false;
+      allow update: if signedIn() &&
+        resource.data.to == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'respondedAt']) &&
+        request.resource.data.status in ['pending', 'available', 'unavailable'] &&
+        request.resource.data.read == true;
+      allow delete: if canDirect(resource.data.pid);
+    }
+
     // Public show listings contain no attendee IDs or RSVP data.
     match /publicShows/{sid} {
       allow read: if signedIn();

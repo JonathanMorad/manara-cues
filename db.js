@@ -12,7 +12,7 @@ function fail(code,msg){ var e = new Error(msg); e.code = code; return e; }
 /* ---------------- DEMO (localStorage) ---------------- */
 function makeDemo(){
   var KEY = "manara-demo-v2", SKEY = "manara-demo-v2-session", subs = [], authCbs = [];
-  function fresh(){ return {setup:false, users:{}, prods:{}, cues:{}, notes:{}, events:{}, responses:{}, scripts:{}, highlights:{}}; }
+  function fresh(){ return {setup:false, users:{}, prods:{}, cues:{}, notes:{}, events:{}, responses:{}, scripts:{}, highlights:{}, notifications:{}}; }
   function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || fresh(); }catch(e){ return fresh(); } }
   var d = load(); d.highlights=d.highlights||{};
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} subs.slice().forEach(function(f){ f(); }); }
@@ -24,7 +24,7 @@ function makeDemo(){
   function byName(n){ for(var k in d.users) if(d.users[k].username===cleanUsername(n)) return d.users[k]; return null; }
   return {
     mode:"demo",
-    init:function(){ d = load(); d.highlights=d.highlights||{}; return Promise.resolve({needsSetup: !d.setup}); },
+    init:function(){ d = load(); d.highlights=d.highlights||{}; d.notifications=d.notifications||{}; return Promise.resolve({needsSetup: !d.setup}); },
     onAuth:function(cb){ authCbs.push(cb); setTimeout(function(){ cb(pub(d.users[sess()])); },0); },
     setupAdmin:function(o){
       if(d.setup) return Promise.reject(fail("already","Setup is already done."));
@@ -42,6 +42,10 @@ function makeDemo(){
       var id = uid(); d.users[id] = {uid:id, username:cleanUsername(o.username), name:o.name, isAdmin:!!o.isAdmin, code:o.code}; save(); return Promise.resolve(id);
     },
     watchUsers:function(cb){ return watch(function(){ return Object.keys(d.users).map(function(k){ return pub(d.users[k]); }); }, cb); },
+    watchNotifications:function(uid_,cb){ return watch(function(){ return Object.keys(d.notifications).map(function(k){return d.notifications[k];}).filter(function(n){return n.to===uid_;}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); },cb); },
+    watchProductionNotifications:function(pid,cb){ return watch(function(){ return Object.keys(d.notifications).map(function(k){return d.notifications[k];}).filter(function(n){return n.pid===pid;}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); },cb); },
+    createNotification:function(n){ var x=plain(n); d.notifications[x.id]=x; save(); return Promise.resolve(x.id); },
+    updateNotification:function(id,patch){ if(d.notifications[id]){Object.assign(d.notifications[id],plain(patch));save();} return Promise.resolve(); },
     watchProductions:function(user, cb){
       return watch(function(){ return Object.keys(d.prods).map(function(k){ return d.prods[k]; }).filter(function(p){ return user.isAdmin || (p.memberIds||[]).indexOf(user.uid)>-1; }); }, cb);
     },
@@ -126,6 +130,10 @@ async function makeFirebase(cfg){
       return cred.user.uid;
     })()); },
     watchUsers:function(cb){ return F.onSnapshot(F.collection(db,"users"), function(s){ cb(docs(s)); }, function(){}); },
+    watchNotifications:function(uid,cb){ return F.onSnapshot(F.query(F.collection(db,"notifications"),F.where("to","==",uid)),function(s){cb(docs(s).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}));},function(){}); },
+    watchProductionNotifications:function(pid,cb){ return F.onSnapshot(F.query(F.collection(db,"notifications"),F.where("pid","==",pid)),function(s){cb(docs(s).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}));},function(){}); },
+    createNotification:function(n){ var ref=F.doc(F.collection(db,"notifications")), x=Object.assign({},plain(n),{id:ref.id}); return wrap(F.setDoc(ref,x)); },
+    updateNotification:function(id,patch){ return wrap(F.updateDoc(F.doc(db,"notifications",id),patch)); },
     watchProductions:function(user, cb){
       var q = user.isAdmin ? F.collection(db,"productions") : F.query(F.collection(db,"productions"), F.where("memberIds","array-contains",user.uid));
       return F.onSnapshot(q, function(s){ cb(docs(s)); }, function(){});
