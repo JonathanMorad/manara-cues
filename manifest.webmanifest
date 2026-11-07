@@ -1,0 +1,25 @@
+{
+  "name": "Manara Drama Team Cues",
+  "short_name": "Manara Cues",
+  "description": "Music cue sheet for the Manara Drama Team",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1F2124",
+  "theme_color": "#1F2124",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
