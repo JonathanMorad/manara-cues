@@ -177,15 +177,17 @@ async function makeFirebase(cfg){
     })());},
     saveEvent:function(pid,e){return wrap((async function(){
       var b=F.writeBatch(db), eventRef=F.doc(db,"productions",pid,"events",e.id), publicRef=F.doc(db,"publicShows",pid+"_"+e.id);
+      var existingPublic=await F.getDoc(publicRef);
       b.set(eventRef,plain(e));
       if(e.kind==="show") b.set(publicRef,{id:e.id,pid:pid,kind:"show",title:e.title,startsAt:e.startsAt,productionName:e.productionName||"",updatedAt:e.updatedAt||Date.now()});
-      else b.delete(publicRef);
+      else if(existingPublic.exists()) b.delete(publicRef);
       return b.commit();
     })());},
     deleteEvent:function(pid,id){ return wrap((async function(){
       var c=F.collection(db,"productions",pid,"events",id,"responses"), snap=await F.getDocs(c);
       await Promise.all(snap.docs.map(function(x){return F.deleteDoc(x.ref);}));
-      var b=F.writeBatch(db);b.delete(F.doc(db,"productions",pid,"events",id));b.delete(F.doc(db,"publicShows",pid+"_"+id));return b.commit();
+      var publicRef=F.doc(db,"publicShows",pid+"_"+id), existingPublic=await F.getDoc(publicRef);
+      var b=F.writeBatch(db);b.delete(F.doc(db,"productions",pid,"events",id));if(existingPublic.exists())b.delete(publicRef);return b.commit();
     })()); },
     watchResponses:function(pid,eid,cb){ return F.onSnapshot(F.collection(db,"productions",pid,"events",eid,"responses"),function(s){ cb(docs(s)); },function(){}); },
     saveResponse:function(pid,eid,uid_,response){ return wrap(F.setDoc(F.doc(db,"productions",pid,"events",eid,"responses",uid_),{uid:uid_,response:response,updatedAt:Date.now()})); },
