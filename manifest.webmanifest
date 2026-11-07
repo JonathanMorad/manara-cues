@@ -1,7 +1,7 @@
 {
-  "name": "Manara Drama Team Cues",
-  "short_name": "Manara Cues",
-  "description": "Music cue sheet for the Manara Drama Team",
+  "name": "Manara Drama Team",
+  "short_name": "Manara",
+  "description": "Manara Drama Team: cues, rehearsals and scripts",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

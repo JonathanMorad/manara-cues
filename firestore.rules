@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userPath(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function isAdmin() {
+      return signedIn() && exists(userPath(request.auth.uid)) &&
+        get(userPath(request.auth.uid)).data.isAdmin == true;
+    }
+    function prodPath(pid) { return /databases/$(database)/documents/productions/$(pid); }
+    function prod(pid) { return get(prodPath(pid)).data; }
+    function isMember(pid) {
+      return signedIn() && (isAdmin() ||
+        (exists(prodPath(pid)) && request.auth.uid in prod(pid).memberIds));
+    }
+    function hasRole(pid, role) {
+      return isMember(pid) && request.auth.uid in prod(pid).members &&
+        prod(pid).members[request.auth.uid].hasAny([role]);
+    }
+    function canDirect(pid) { return isAdmin() || hasRole(pid, 'director'); }
+    function eventPath(pid, eid) {
+      return /databases/$(database)/documents/productions/$(pid)/events/$(eid);
+    }
+    function canReadEvent(pid, eid) {
+      return isMember(pid) && exists(eventPath(pid, eid)) &&
+        (canDirect(pid) || request.auth.uid in get(eventPath(pid, eid)).data.memberIds);
+    }
+
+    // First admin setup is allowed once; all later account creation is admin-controlled.
+    match /meta/{doc} {
+      allow read: if true;
+      allow create: if signedIn() && !exists(/databases/$(database)/documents/meta/setup);
+      allow update, delete: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if signedIn() && (
+        (request.auth.uid == uid && request.resource.data.isAdmin == true &&
+          !exists(/databases/$(database)/documents/meta/setup)) || isAdmin());
+      allow update: if isAdmin() ||
+        (request.auth.uid == uid && request.resource.data.isAdmin == resource.data.isAdmin);
+      allow delete: if isAdmin();
+    }
+
+    match /productions/{pid} {
+      allow read: if signedIn() && (isAdmin() || request.auth.uid in resource.data.memberIds);
+      allow create: if isAdmin();
+      allow update: if canDirect(pid);
+      allow delete: if isAdmin();
+
+      match /cues/{cid} {
+        allow read: if isMember(pid);
+        allow create: if isMember(pid) &&
+          (canDirect(pid) || hasRole(pid, request.resource.data.dept));
+        allow update: if isMember(pid) && (canDirect(pid) ||
+          (hasRole(pid, resource.data.dept) &&
+           request.resource.data.dept == resource.data.dept));
+        allow delete: if isMember(pid) &&
+          (canDirect(pid) || hasRole(pid, resource.data.dept));
+      }
+
+      match /notes/{nid} {
+        allow read: if isMember(pid) &&
+          (resource.data.author == request.auth.uid ||
+           resource.data.get('to', '') == request.auth.uid);
+        allow create: if isMember(pid) &&
+          request.resource.data.author == request.auth.uid &&
+          (!('to' in request.resource.data) ||
+            (canDirect(pid) && request.resource.data.to in prod(pid).memberIds));
+        allow update: if false;
+        allow delete: if isMember(pid) && resource.data.author == request.auth.uid;
+      }
+
+      match /events/{eid} {
+        allow read: if isMember(pid) &&
+          (canDirect(pid) || request.auth.uid in resource.data.memberIds);
+        allow create: if canDirect(pid) &&
+          request.resource.data.createdBy == request.auth.uid &&
+          request.resource.data.memberIds is list &&
+          request.resource.data.memberIds.hasOnly(prod(pid).memberIds);
+        allow update: if canDirect(pid) &&
+          request.resource.data.createdBy == resource.data.createdBy &&
+          request.resource.data.memberIds is list &&
+          request.resource.data.memberIds.hasOnly(prod(pid).memberIds);
+        allow delete: if canDirect(pid);
+
+        match /responses/{uid} {
+          allow read: if canReadEvent(pid, eid);
+          allow create, update: if canReadEvent(pid, eid) &&
+            request.auth.uid == uid &&
+            uid in get(eventPath(pid, eid)).data.memberIds &&
+            request.resource.data.uid == uid &&
+            request.resource.data.response in ['going', 'not-going'];
+          allow delete: if canReadEvent(pid, eid) &&
+            request.auth.uid == uid && uid in get(eventPath(pid, eid)).data.memberIds;
+        }
+      }
+
+      match /scripts/{sid} {
+        allow read: if isMember(pid);
+        allow create, update, delete: if canDirect(pid);
+      }
+    }
+  }
+}
