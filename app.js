@@ -12,9 +12,9 @@ var SWATCHES = ["#FFFFFF","#FFD27A","#FF8A3D","#E5484D","#E255A1","#8E6BFF","#3E
 
 /* ===== state ===== */
 var DB = null;
-var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, scripts:[], highlights:[], notifications:[], prodNotifications:[],
+var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, scripts:[], highlights:[],
   tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", lang:"en", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
-var unsub = {users:null, prods:null, cues:null, notes:null, events:null, publicShows:null, highlights:null, scripts:null, notifications:null, prodNotifications:null, responses:{}};
+var unsub = {users:null, prods:null, cues:null, notes:null, events:null, publicShows:null, highlights:null, scripts:null, responses:{}};
 
 /* ===== helpers ===== */
 function uid(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3); }
@@ -72,7 +72,7 @@ function applyLanguage(){
 Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"مشاهد","people":"أشخاص","Tomorrow":"غدًا","No upcoming dates yet.":"لا توجد مواعيد قادمة.","Nothing from the director yet.":"لا توجد ملاحظات من المخرج بعد.","See all notes":"عرض كل الملاحظات","Open Live mode":"افتح وضع العرض","Overview":"نظرة عامة","Scenes":"المشاهد","Add a scene to start the script.":"أضف مشهدًا لبدء النص.","The director has not added this scene’s script yet.":"لم يضف المخرج نص هذا المشهد بعد.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Only you can see this note.":"لا يرى هذه الملاحظة سواك.","Private notes are only visible to you. Notes you send to a person are visible to them and to you.":"لا يطلع على ملاحظاتك الخاصة سواك. الملاحظات المرسلة لشخص يراها هو وأنت.","Notes from the director appear here.":"تظهر هنا ملاحظات المخرج.","No dates yet. A director can add rehearsals and production dates.":"لا توجد مواعيد بعد. يمكن للمخرج إضافة البروفات والعروض.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","No rehearsals or production dates yet. A director can add the first date.":"لا توجد بروفات أو عروض بعد. يمكن للمخرج إضافة أول موعد.","All production members":"كل أعضاء الإنتاج","Add a date":"أضف موعدًا","Name":"الاسم","Date":"التاريخ","Time":"الوقت","Production":"عرض","Edit date":"تعديل الموعد","Save date":"حفظ الموعد","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","Director":"مخرج","Edit production and scenes":"تعديل الإنتاج والمشاهد","Add rehearsal":"أضف بروفة","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","Select a department":"اختر القسم","Department":"القسم","Sound":"صوت","Lighting":"إضاءة","Delete cue":"حذف الإشارة","Duplicate":"نسخ","Save cue":"حفظ الإشارة","Scene script":"نص المشهد","Paste or type the script for this scene":"الصق أو اكتب نص هذا المشهد","Save script":"حفظ النص","Edit script":"تعديل النص","Add script":"أضف النص","Roles in":"الأدوار في","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","The code needs at least 6 characters.":"يجب أن يتكون الرمز من 6 أحرف على الأقل.","Enter a name and a username (letters and numbers).":"أدخل الاسم واسم المستخدم (حروف وأرقام).","The production needs a name.":"يجب إدخال اسم للإنتاج.","Name at least one scene.":"أدخل اسمًا لمشهد واحد على الأقل.","Keep at least one named scene.":"يجب الإبقاء على مشهد واحد مسمّى على الأقل.","Create the first one.":"أنشئ أول إنتاج.","You are not in any production yet. Ask your director or admin to add you.":"لست ضمن أي إنتاج بعد. اطلب من المخرج أو المشرف إضافتك.","This production has no scenes yet.":"لا توجد مشاهد في هذا الإنتاج بعد.","Someone":"شخص","Switch to light mode":"التبديل إلى الوضع الفاتح","Switch to dark mode":"التبديل إلى الوضع الداكن","Your profile":"ملفك الشخصي","Choose a production":"اختر إنتاجًا","Scenes":"المشاهد","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت"});
 AR_TEXT["Account codes are managed by admins. Contact an admin if you need help signing in."]="يتولى المشرفون إدارة رموز الدخول. تواصل مع أحدهم إذا احتجت إلى مساعدة في تسجيل الدخول.";
 AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
-AR_TEXT["Notifications"]="الإشعارات"; AR_TEXT["Production invitation"]="دعوة للإنتاج"; AR_TEXT["You’ve been added to"]="تمت إضافتك إلى"; AR_TEXT["as"]="بصفة"; AR_TEXT["Your part:"]="دورك:"; AR_TEXT["Can you take part in this production?"]="هل يمكنك المشاركة في هذا الإنتاج؟"; AR_TEXT["Available"]="متاح"; AR_TEXT["Unavailable"]="غير متاح"; AR_TEXT["Awaiting reply"]="بانتظار الرد"; AR_TEXT["Your reply:"]="ردك:"; AR_TEXT["No notifications yet."]="لا توجد إشعارات بعد."; AR_TEXT["Done"]="تم"; AR_TEXT["Your reply has been sent to the director."]="تم إرسال ردك إلى المخرج."; AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
+AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
 
 /* ===== logo ===== */
 function logo(size){
@@ -83,7 +83,6 @@ function logo(size){
    +'<path d="M19.25 24h9.5l.5 4h-10.5z M18.1 33h11.8l.5 4h-12.8z" fill="var(--light)"/><rect x="13.5" y="42" width="21" height="3.2" rx="1" fill="currentColor"/></svg>';
 }
 var IC = {
-  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
   home:'<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
   cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   script:'<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/>',
@@ -142,7 +141,6 @@ function renderShell(){
     +'<div class="top-production"><small>Current production</small><b>'+esc(p?p.name:"No production selected")+'</b></div>'
     +'<button class="theme-toggle" data-act="theme-toggle" aria-label="Switch to '+(effectiveTheme()==="dark"?'light':'dark')+' mode">'+(effectiveTheme()==="dark"?'☼ Light':'◐ Dark')+'</button>'
     +'<button class="language-toggle" data-act="language-toggle" aria-label="Switch language">'+(S.lang==="ar"?'English':'عربي')+'</button>'
-    +'<button class="notification-button" data-act="notifications" aria-label="Notifications">'+ic("bell",20)+(S.notifications.filter(function(n){return !n.read;}).length?'<span class="notification-count">'+S.notifications.filter(function(n){return !n.read;}).length+'</span>':'')+'</button>'
     +'<button class="avatar" data-act="tab" data-t="team" aria-label="Your profile">'+esc(initials(S.user.name))+'</button></header>';
   h+='<div class="production-selector-bar"><div class="production-sidebar-title">Productions</div><nav class="production-list" aria-label="Choose a production">';
   if(S.prods.length) S.prods.forEach(function(x){ h+='<button class="production-choice" data-act="switch-prod" data-id="'+esc(x.id)+'" aria-current="'+(x.id===S.pid)+'"><span class="production-indicator" aria-hidden="true"></span><span class="production-choice-name">'+esc(x.name)+'</span></button>'; });
@@ -354,8 +352,7 @@ function renderTeam(p){
     ids.sort(function(a,b){ return nameOf(a).localeCompare(nameOf(b)); }).forEach(function(id){
       var role=p.members[id];
       var part=(p.characters||{})[id];
-      var invite=latestProductionInvite(id), reply=invite&&invite.status;
-      h+='<button class="li" data-act="member" data-id="'+id+'"'+(isDirector()?'':' disabled')+'><span class="grow"><b>'+esc(nameOf(id))+'</b><br><small>@'+esc((userById(id)||{}).username||"")+(part?'<br><span class="character-part">Playing: '+esc(part)+'</span>':'')+'</small></span><span class="member-badges"><span class="badge">'+esc(roleLabel(role))+'</span>'+(reply?'<small class="invitation-state '+(reply==='pending'?'pending':reply)+'">'+(reply==='available'?'Available':reply==='unavailable'?'Unavailable':'Awaiting reply')+'</small>':'')+'</span></button>';
+      h+='<button class="li" data-act="member" data-id="'+id+'"'+(isDirector()?'':' disabled')+'><span class="grow"><b>'+esc(nameOf(id))+'</b><br><small>@'+esc((userById(id)||{}).username||"")+(part?'<br><span class="character-part">Playing: '+esc(part)+'</span>':'')+'</small></span><span class="badge">'+esc(roleLabel(role))+'</span></button>';
     });
     if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Rename production or edit scenes</button>';
   }
@@ -407,21 +404,7 @@ function renderSheet(){
   var sh=S.sheet; if(!sh) return '';
   var h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true">';
   var p=prod();
-  if(sh.type==="notifications"){
-    var inbox=S.notifications.slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
-    h+='<h2>Notifications</h2>';
-    if(!inbox.length) h+='<div class="empty">No notifications yet.</div>';
-    inbox.forEach(function(n){
-      var response=n.status||"pending", when=new Date(n.createdAt||Date.now()).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{month:"short",day:"numeric"});
-      h+='<div class="card invitation-card"><div class="row"><b class="grow">Production invitation</b><small class="muted">'+esc(when)+'</small></div>'
-        +'<p>You’ve been added to <b>'+esc(n.productionName||"a production")+'</b> as <b>'+esc(roleLabel(n.roles||[]))+'</b>.</p>'
-        +(n.character?'<p class="muted small">Your part: '+esc(n.character)+'</p>':'')
-        +(response==="pending"?'<p class="hint">Can you take part in this production?</p><div class="sheetrow"><button class="btn primary" data-act="notification-response" data-id="'+esc(n.id)+'" data-r="available">Available</button><button class="btn" data-act="notification-response" data-id="'+esc(n.id)+'" data-r="unavailable">Unavailable</button></div>':'<p class="invitation-replied">Your reply: <b>'+ (response==="available"?'Available':'Unavailable')+'</b></p>')
-        +'</div>';
-    });
-    h+='<button class="btn block" data-act="close">Done</button>';
-  }
-  else if(sh.type==="cue"){
+  if(sh.type==="cue"){
     var d=sh.draft, acts=actionsFor(d.dept);
     h+='<h2>'+(sh.isNew?'New cue':'Edit cue '+numberOf(d))+'</h2>';
     if(sh.isNew && myDepts().length>1) h+='<div class="seg" role="group" aria-label="Department"><button data-act="cue-dept" data-d="sound" aria-pressed="'+(d.dept==="sound")+'">Sound</button><button data-act="cue-dept" data-d="lighting" aria-pressed="'+(d.dept==="lighting")+'">Lighting</button></div>';
@@ -539,7 +522,7 @@ function setDraft(k,v){
 
 /* ===== data wiring ===== */
 function stopAll(){
-  ["users","prods","cues","notes","events","publicShows","highlights","scripts","notifications","prodNotifications"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
+  ["users","prods","cues","notes","events","publicShows","highlights","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
   Object.keys(unsub.responses||{}).forEach(function(k){ try{unsub.responses[k]();}catch(e){} }); unsub.responses={};
 }
 function watchEventResponses(pid,events){
@@ -555,7 +538,6 @@ function startWatch(){
   stopAll();
   var syncedProds="";
   unsub.users=DB.watchUsers(function(l){ S.users=l; softRender(); });
-  unsub.notifications=DB.watchNotifications(S.user.uid,function(l){ S.notifications=l; softRender(); });
   unsub.publicShows=DB.watchPublicShows(function(l){ S.publicShows=l; watchEventResponses(S.pid,allVisibleEvents()); softRender(); });
   unsub.prods=DB.watchProductions(S.user,function(l){
     S.prods=l;
@@ -571,16 +553,15 @@ function startWatch(){
   });
 }
 function selectProd(id){
-  S.pid=id; S.cues=[]; S.notes=[]; S.events=[]; S.responses={}; S.scripts=[]; S.highlights=[]; S.prodNotifications=[]; S.sceneId=null; S.live=null;
+  S.pid=id; S.cues=[]; S.notes=[]; S.events=[]; S.responses={}; S.scripts=[]; S.highlights=[]; S.sceneId=null; S.live=null;
   try{ if(id) localStorage.setItem("manara-pid",id); }catch(e){}
-  ["cues","notes","events","highlights","scripts","prodNotifications"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
+  ["cues","notes","events","highlights","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
   Object.keys(unsub.responses||{}).forEach(function(k){try{unsub.responses[k]();}catch(e){}}); unsub.responses={};
   if(id && S.user){
     unsub.cues=DB.watchCues(id,function(l){ S.cues=l; softRender(); });
     unsub.notes=DB.watchNotes(id,S.user.uid,function(l){ S.notes=l; softRender(); });
     unsub.events=DB.watchEvents(id,S.user,function(l){ S.events=l; watchEventResponses(id,allVisibleEvents()); softRender(); });
     unsub.scripts=DB.watchScripts(id,function(l){ S.scripts=l; softRender(); });
-    if(isDirector()) unsub.prodNotifications=DB.watchProductionNotifications(id,function(l){ S.prodNotifications=l; softRender(); });
   }
   watchCurrentHighlights();
 }
@@ -588,22 +569,12 @@ function onUser(u){
   var fresh = u && (!S.user || S.user.uid!==u.uid);
   S.user=u; S.ready=true; S.busy=false; if(u) S.form={};
   if(fresh){ S.tab="home"; S.prodView="overview"; S.dept="all"; S.sceneId=null; S.live=null; S.sheet=null; }
-  if(u){ S.authErr=""; startWatch(); } else { stopAll(); S.prods=[]; S.cues=[]; S.notes=[]; S.events=[]; S.publicShows=[]; S.highlights=[]; S.scripts=[]; S.notifications=[]; S.prodNotifications=[]; S.responses={}; S.users=[]; S.pid=null; S.live=null; S.sheet=null; }
+  if(u){ S.authErr=""; startWatch(); } else { stopAll(); S.prods=[]; S.cues=[]; S.notes=[]; S.events=[]; S.publicShows=[]; S.highlights=[]; S.scripts=[]; S.responses={}; S.users=[]; S.pid=null; S.live=null; S.sheet=null; }
   render();
 }
 function saveProd(p){
   p.memberIds=Object.keys(p.members||{});
   return absorb(DB.saveProduction(p),"Could not save");
-}
-function assignmentNotification(p,targetUid){
-  return DB.createNotification({id:uid(),type:"production_invite",pid:p.id,to:targetUid,from:S.user.uid,senderName:S.user.name,productionName:p.name,roles:roleList(p.members[targetUid]).slice(),character:(p.characters||{})[targetUid]||"",status:"pending",read:false,createdAt:Date.now()});
-}
-function saveProdAndNotify(p,targetUid){
-  p.memberIds=Object.keys(p.members||{});
-  return DB.saveProduction(p).then(function(){return assignmentNotification(p,targetUid);}).then(function(){return true;}).catch(function(e){toast("Could not save or send the invitation: "+err(e));return false;});
-}
-function latestProductionInvite(targetUid){
-  return S.prodNotifications.filter(function(n){return n.to===targetUid&&n.type==="production_invite";}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);})[0]||null;
 }
 function parseScenes(rows){ return rows.map(function(x){ return {id:x.id||uid(),name:String(x.name||"").trim()}; }).filter(function(x){ return !!x.name; }); }
 
@@ -632,7 +603,6 @@ function handle(act, el){
       try{localStorage.setItem("manara-theme",S.theme);}catch(e){}
       render(); break;
     case "language-toggle": S.lang=S.lang==="ar"?"en":"ar"; try{localStorage.setItem("manara-language",S.lang);}catch(e){} render(); break;
-    case "notifications": openSheet({type:"notifications"}); break;
     case "tab": var nextTab=el.getAttribute("data-t"); if(nextTab!==S.tab) S.lastTab=S.tab; S.tab=nextTab; watchCurrentHighlights(); if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
     case "cal-mode": S.calMode=el.getAttribute("data-v"); render(); break;
     case "cal-day": S.calSelected=el.getAttribute("data-date"); render(); break;
@@ -673,10 +643,10 @@ function handle(act, el){
     case "add-member": openSheet({type:"add-member",uid:null,role:["actor"]}); break;
     case "pick-person": S.sheet.uid=el.getAttribute("data-id"); render(); break;
     case "pick-role": var role=el.getAttribute("data-r"), ix=S.sheet.role.indexOf(role); if(ix>-1) S.sheet.role.splice(ix,1); else S.sheet.role.push(role); render(); break;
-    case "do-add-member": if(S.sheet.uid&&S.sheet.role.length){ var addedUid=S.sheet.uid; p.members[addedUid]=S.sheet.role.slice(); saveProdAndNotify(p,addedUid).then(function(ok){if(ok)closeSheet();}); } else { S.sheet.err="Choose a person and at least one role."; render(); } break;
+    case "do-add-member": if(S.sheet.uid&&S.sheet.role.length){ var addedUid=S.sheet.uid; p.members[addedUid]=S.sheet.role.slice(); saveProd(p).then(function(){closeSheet();}); } else { S.sheet.err="Choose a person and at least one role."; render(); } break;
     case "member": var memberId=el.getAttribute("data-id"); openSheet({type:"member",uid:memberId,roles:roleList(p.members[memberId]).slice(),character:(p.characters||{})[memberId]||"",confirm:false}); break;
     case "member-role": var mrole=el.getAttribute("data-r"), mix=S.sheet.roles.indexOf(mrole); if(mix>-1) S.sheet.roles.splice(mix,1); else S.sheet.roles.push(mrole); render(); break;
-    case "save-member": if(S.sheet.roles.length){var editedUid=S.sheet.uid, priorRoles=roleList(p.members[editedUid]).slice(), priorCharacter=(p.characters||{})[editedUid]||"", nextRoles=S.sheet.roles.slice(), nextCharacter=(S.sheet.character||"").trim();p.members[editedUid]=nextRoles;p.characters=p.characters||{};if(nextCharacter)p.characters[editedUid]=nextCharacter;else delete p.characters[editedUid];var assignmentChanged=priorRoles.join("|")!==nextRoles.join("|")||priorCharacter!==nextCharacter;(assignmentChanged?saveProdAndNotify(p,editedUid):saveProd(p).then(function(){return true;})).then(function(ok){if(ok!==false)closeSheet();});}else{S.sheet.err="Choose at least one role.";render();} break;
+    case "save-member": if(S.sheet.roles.length){var editedUid=S.sheet.uid,nextCharacter=(S.sheet.character||"").trim();p.members[editedUid]=S.sheet.roles.slice();p.characters=p.characters||{};if(nextCharacter)p.characters[editedUid]=nextCharacter;else delete p.characters[editedUid];saveProd(p).then(function(){closeSheet();});}else{S.sheet.err="Choose at least one role.";render();} break;
     case "remove-member":
       if(!S.sheet.confirm){ S.sheet.confirm=true; render(); break; }
       delete p.members[S.sheet.uid]; if(p.characters)delete p.characters[S.sheet.uid]; saveProd(p).then(function(){ closeSheet(); }); break;
@@ -795,12 +765,6 @@ function handle(act, el){
       var replyEvent=allVisibleEvents().filter(function(x){return x.id===reid;})[0], replyPid=replyEvent&&replyEvent.pid||p.id;
       if(!replyEvent||!replyEvent.memberIds||replyEvent.memberIds.indexOf(S.user.uid)===-1){toast("Only invited production members can reply to this date.");break;}
       absorb(DB.saveResponse(replyPid,reid,S.user.uid,rv),"Could not save your reply"); break;
-    case "notification-response":
-      var nid=el.getAttribute("data-id"), nr=el.getAttribute("data-r"), inviteReply=S.notifications.filter(function(n){return n.id===nid;})[0];
-      if(!inviteReply||inviteReply.to!==S.user.uid||["available","unavailable"].indexOf(nr)<0) break;
-      DB.updateNotification(nid,{status:nr,read:true,respondedAt:Date.now()}).then(function(){inviteReply.status=nr;inviteReply.read=true;inviteReply.respondedAt=Date.now();toast("Your reply has been sent to the director.");}).catch(function(e){toast("Could not send your reply: "+err(e));});
-      break;
-
     case "open-live":
       var dd=myDepts(); if(!dd.length){ toast("Live mode is for sound and lighting."); break; }
       var dep=dd.indexOf(S.dept)>-1?S.dept:dd[0]; S.live={dept:dep,idx:-1}; S.live.idx=Math.min(livePos(dep),liveList().length); render(); break;
