@@ -12,7 +12,7 @@ var SWATCHES = ["#FFFFFF","#FFD27A","#FF8A3D","#E5484D","#E255A1","#8E6BFF","#3E
 
 /* ===== state ===== */
 var DB = null;
-var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, scripts:[], highlights:[],
+var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, responseSaving:{}, scripts:[], highlights:[],
   tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", lang:"en", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
 var unsub = {users:null, prods:null, cues:null, notes:null, events:null, publicShows:null, highlights:null, scripts:null, responses:{}};
 
@@ -70,6 +70,7 @@ function applyLanguage(){
   app.querySelectorAll("[aria-label],[title],[placeholder]").forEach(function(el){["aria-label","title","placeholder"].forEach(function(a){var v=el.getAttribute(a);if(v&&AR_TEXT[v])el.setAttribute(a,AR_TEXT[v]);});});
 }
 Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"مشاهد","people":"أشخاص","Tomorrow":"غدًا","No upcoming dates yet.":"لا توجد مواعيد قادمة.","Nothing from the director yet.":"لا توجد ملاحظات من المخرج بعد.","See all notes":"عرض كل الملاحظات","Open Live mode":"افتح وضع العرض","Overview":"نظرة عامة","Scenes":"المشاهد","Add a scene to start the script.":"أضف مشهدًا لبدء النص.","The director has not added this scene’s script yet.":"لم يضف المخرج نص هذا المشهد بعد.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Only you can see this note.":"لا يرى هذه الملاحظة سواك.","Private notes are only visible to you. Notes you send to a person are visible to them and to you.":"لا يطلع على ملاحظاتك الخاصة سواك. الملاحظات المرسلة لشخص يراها هو وأنت.","Notes from the director appear here.":"تظهر هنا ملاحظات المخرج.","No dates yet. A director can add rehearsals and production dates.":"لا توجد مواعيد بعد. يمكن للمخرج إضافة البروفات والعروض.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","No rehearsals or production dates yet. A director can add the first date.":"لا توجد بروفات أو عروض بعد. يمكن للمخرج إضافة أول موعد.","All production members":"كل أعضاء الإنتاج","Add a date":"أضف موعدًا","Name":"الاسم","Date":"التاريخ","Time":"الوقت","Production":"عرض","Edit date":"تعديل الموعد","Save date":"حفظ الموعد","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","Director":"مخرج","Edit production and scenes":"تعديل الإنتاج والمشاهد","Add rehearsal":"أضف بروفة","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","Select a department":"اختر القسم","Department":"القسم","Sound":"صوت","Lighting":"إضاءة","Delete cue":"حذف الإشارة","Duplicate":"نسخ","Save cue":"حفظ الإشارة","Scene script":"نص المشهد","Paste or type the script for this scene":"الصق أو اكتب نص هذا المشهد","Save script":"حفظ النص","Edit script":"تعديل النص","Add script":"أضف النص","Roles in":"الأدوار في","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","The code needs at least 6 characters.":"يجب أن يتكون الرمز من 6 أحرف على الأقل.","Enter a name and a username (letters and numbers).":"أدخل الاسم واسم المستخدم (حروف وأرقام).","The production needs a name.":"يجب إدخال اسم للإنتاج.","Name at least one scene.":"أدخل اسمًا لمشهد واحد على الأقل.","Keep at least one named scene.":"يجب الإبقاء على مشهد واحد مسمّى على الأقل.","Create the first one.":"أنشئ أول إنتاج.","You are not in any production yet. Ask your director or admin to add you.":"لست ضمن أي إنتاج بعد. اطلب من المخرج أو المشرف إضافتك.","This production has no scenes yet.":"لا توجد مشاهد في هذا الإنتاج بعد.","Someone":"شخص","Switch to light mode":"التبديل إلى الوضع الفاتح","Switch to dark mode":"التبديل إلى الوضع الداكن","Your profile":"ملفك الشخصي","Choose a production":"اختر إنتاجًا","Scenes":"المشاهد","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت"});
+Object.assign(AR_TEXT,{"Going":"الحاضرون","Can’t make it":"المعتذرون","No one yet":"لا أحد حتى الآن"});
 AR_TEXT["Account codes are managed by admins. Contact an admin if you need help signing in."]="يتولى المشرفون إدارة رموز الدخول. تواصل مع أحدهم إذا احتجت إلى مساعدة في تسجيل الدخول.";
 AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
 AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
@@ -303,14 +304,18 @@ function renderCalendar(p){
   return h;
 }
 function renderCalendarEvent(e){
-  var rs=S.responses[e.id]||[], yes=rs.filter(function(r){return r.response==="going";}).length, no=rs.filter(function(r){return r.response==="not-going";}).length;
+  var memberIds=e.memberIds||[], rs=(S.responses[e.id]||[]).filter(function(r){return memberIds.indexOf(r.uid)>-1;}), yes=rs.filter(function(r){return r.response==="going";}).length, no=rs.filter(function(r){return r.response==="not-going";}).length;
   var mine=rs.filter(function(r){return r.uid===S.user.uid;})[0], invite=(e.memberIds||[]).indexOf(S.user.uid)>-1, days=daysUntil(e.startsAt), show=e.kind==="show";
-  var eventProd=S.prods.filter(function(x){return x.id===e.pid;})[0], canManage=isDirector()&&(!e.pid||e.pid===S.pid), canRespond=invite&&!!eventProd;
+  var eventProd=S.prods.filter(function(x){return x.id===e.pid;})[0], canManage=isDirector()&&(!e.pid||e.pid===S.pid), canRespond=invite&&!!eventProd, saving=!!S.responseSaving[e.id];
   var context=e.productionName||(eventProd&&eventProd.name), otherProd=e.pid&&e.pid!==S.pid;
   var h='<article class="card event-card '+(show?'event-show':'event-rehearsal')+'"><div class="row"><span class="event-kind '+(show?'show':'rehearsal')+'"><i></i>'+(show?'Production / show':'Rehearsal')+'</span><span class="grow"></span>'+(canManage?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
   h+='<h3>'+esc(e.title)+'</h3><p class="muted small">'+esc(dateLabel(e.startsAt))+(otherProd&&context?' · '+esc(context):'')+'</p><b class="countdown">'+(S.lang==="ar"?(days<0?'مضى':days===0?'اليوم':days===1?'غدًا':'بعد '+days+' يومًا'):(days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days away'))+'</b>';
-  if(canRespond||isAdmin()) h+='<p class="muted small">'+yes+' going · '+no+' can’t make it</p>';
-  if(canRespond) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going")+'">I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going")+'">Can’t make it</button></div>';
+  if(canRespond||canManage) h+='<p class="muted small">'+(S.lang==="ar"?yes+' حاضر · '+no+' معتذر':yes+' going · '+no+' can’t make it')+'</p>';
+  if(canManage){
+    var goingNames=rs.filter(function(r){return r.response==="going";}).map(function(r){return nameOf(r.uid);}).sort(), noNames=rs.filter(function(r){return r.response==="not-going";}).map(function(r){return nameOf(r.uid);}).sort();
+    h+='<div class="rsvp-roster" aria-live="polite"><div><b>Going</b><p>'+esc(goingNames.length?goingNames.join(', '):'No one yet')+'</p></div><div><b>Can’t make it</b><p>'+esc(noNames.length?noNames.join(', '):'No one yet')+'</p></div></div>';
+  }
+  if(canRespond) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going"?"true":"false")+'"'+(saving?' disabled':'')+'>I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going"?"true":"false")+'"'+(saving?' disabled':'')+'>Can’t make it</button></div>';
   else if(show) h+='<p class="hint">Visible to all Manara users. RSVPs are for members of this production.</p>';
   else h+='<p class="hint">This rehearsal is for selected members of this production.</p>';
   return h+'</article>';
@@ -545,10 +550,15 @@ function watchEventResponses(pid,events){
   var wanted={};
   events.forEach(function(e){
     var eventPid=e.pid||pid, member=S.prods.some(function(x){return x.id===eventPid;});
-    if(isAdmin()||(member&&(e.memberIds||[]).indexOf(S.user.uid)>-1)) wanted[eventPid+":"+e.id]=e;
+    if(isAdmin()||(member&&(isDirector()||(e.memberIds||[]).indexOf(S.user.uid)>-1))) wanted[eventPid+":"+e.id]=e;
   });
   Object.keys(unsub.responses).forEach(function(key){ if(!wanted[key]){ try{unsub.responses[key]();}catch(e){} delete unsub.responses[key]; delete S.responses[key.split(":").pop()]; } });
-  Object.keys(wanted).forEach(function(key){ var e=wanted[key], eventPid=e.pid||pid; if(!unsub.responses[key]) unsub.responses[key]=DB.watchResponses(eventPid,e.id,function(list){ S.responses[e.id]=list; softRender(); }); });
+  Object.keys(wanted).forEach(function(key){ var e=wanted[key], eventPid=e.pid||pid; if(!unsub.responses[key]) unsub.responses[key]=DB.watchResponses(eventPid,e.id,function(list){
+    var pending=S.responseSaving[e.id];
+    if(pending) S.responses[e.id]=list.filter(function(r){return r.uid!==S.user.uid;}).concat([pending.optimistic]);
+    else S.responses[e.id]=list;
+    softRender();
+  }); });
 }
 function startWatch(){
   stopAll();
@@ -569,14 +579,14 @@ function startWatch(){
   });
 }
 function selectProd(id){
-  S.pid=id; S.cues=[]; S.notes=[]; S.events=[]; S.responses={}; S.scripts=[]; S.highlights=[]; S.sceneId=null; S.live=null;
+  S.pid=id; S.cues=[]; S.notes=[]; S.events=[]; S.responses={}; S.responseSaving={}; S.scripts=[]; S.highlights=[]; S.sceneId=null; S.live=null;
   try{ if(id) localStorage.setItem("manara-pid",id); }catch(e){}
   ["cues","notes","events","highlights","scripts"].forEach(function(k){ if(unsub[k]){ try{ unsub[k](); }catch(e){} unsub[k]=null; } });
   Object.keys(unsub.responses||{}).forEach(function(k){try{unsub.responses[k]();}catch(e){}}); unsub.responses={};
   if(id && S.user){
     unsub.cues=DB.watchCues(id,function(l){ S.cues=l; softRender(); });
     unsub.notes=DB.watchNotes(id,S.user.uid,function(l){ S.notes=l; softRender(); });
-    unsub.events=DB.watchEvents(id,S.user,function(l){ S.events=l; watchEventResponses(id,allVisibleEvents()); softRender(); });
+    unsub.events=DB.watchEvents(id,Object.assign({},S.user,{isDirector:isDirector()}),function(l){ S.events=l; watchEventResponses(id,allVisibleEvents()); softRender(); });
     unsub.scripts=DB.watchScripts(id,function(l){ S.scripts=l; softRender(); });
   }
   watchCurrentHighlights();
@@ -780,7 +790,18 @@ function handle(act, el){
       var reid=el.getAttribute("data-id"), rv=el.getAttribute("data-r");
       var replyEvent=allVisibleEvents().filter(function(x){return x.id===reid;})[0], replyPid=replyEvent&&replyEvent.pid||p.id;
       if(!replyEvent||!replyEvent.memberIds||replyEvent.memberIds.indexOf(S.user.uid)===-1){toast("Only invited production members can reply to this date.");break;}
-      absorb(DB.saveResponse(replyPid,reid,S.user.uid,rv),"Could not save your reply"); break;
+      if(S.responseSaving[reid]) break;
+      var priorResponses=(S.responses[reid]||[]).slice(), optimistic={uid:S.user.uid,response:rv,updatedAt:Date.now()}, pendingResponse={uid:S.user.uid,optimistic:optimistic,confirmed:priorResponses};
+      S.responseSaving[reid]=pendingResponse;
+      S.responses[reid]=priorResponses.filter(function(r){return r.uid!==S.user.uid;}).concat([optimistic]); render();
+      DB.saveResponse(replyPid,reid,S.user.uid,rv).then(function(){
+        if(S.responseSaving[reid]!==pendingResponse) return;
+        delete S.responseSaving[reid]; render();
+      }).catch(function(e){
+        if(S.responseSaving[reid]!==pendingResponse) return;
+        S.responses[reid]=pendingResponse.confirmed; delete S.responseSaving[reid];
+        toast("Could not save your reply: "+err(e));
+      }); break;
     case "open-live":
       var dd=myDepts(); if(!dd.length){ toast("Live mode is for sound and lighting."); break; }
       var dep=dd.indexOf(S.dept)>-1?S.dept:dd[0]; S.live={dept:dep,idx:-1}; S.live.idx=Math.min(livePos(dep),liveList().length); render(); break;

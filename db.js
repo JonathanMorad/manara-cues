@@ -54,7 +54,7 @@ function makeDemo(){
     },
     saveNote:function(pid, n){ d.notes[n.id] = Object.assign(plain(n), {pid:pid}); save(); return Promise.resolve(); },
     deleteNote:function(pid, id){ delete d.notes[id]; save(); return Promise.resolve(); },
-    watchEvents:function(pid, user, cb){ return watch(function(){ return Object.keys(d.events).map(function(k){ return d.events[k]; }).filter(function(e){ return e.pid===pid && (user.isAdmin || (e.memberIds||[]).indexOf(user.uid)>-1); }); }, cb); },
+    watchEvents:function(pid, user, cb){ return watch(function(){ return Object.keys(d.events).map(function(k){ return d.events[k]; }).filter(function(e){ return e.pid===pid && (user.isAdmin || user.isDirector || (e.memberIds||[]).indexOf(user.uid)>-1); }); }, cb); },
     watchPublicShows:function(cb){ return watch(function(){ return Object.keys(d.events).map(function(k){ return d.events[k]; }).filter(function(e){ return e.kind==="show"; }); }, cb); },
     saveEvent:function(pid, e){ d.events[e.id] = Object.assign(plain(e), {pid:pid}); save(); return Promise.resolve(); },
     deleteEvent:function(pid, id){ delete d.events[id]; Object.keys(d.responses).forEach(function(k){ if(k.indexOf(id+":")===0) delete d.responses[k]; }); save(); return Promise.resolve(); },
@@ -146,7 +146,7 @@ async function makeFirebase(cfg){
     deleteNote:function(pid, id){ return wrap(F.deleteDoc(F.doc(db,"productions",pid,"notes",id))); },
     watchEvents:function(pid, user, cb){
       var c=F.collection(db,"productions",pid,"events");
-      var q=user.isAdmin?c:F.query(c,F.where("memberIds","array-contains",user.uid));
+      var q=(user.isAdmin||user.isDirector)?c:F.query(c,F.where("memberIds","array-contains",user.uid));
       return F.onSnapshot(q,function(s){ cb(docs(s).map(function(e){e.pid=pid;return e;})); },function(){});
     },
     watchPublicShows:function(cb){

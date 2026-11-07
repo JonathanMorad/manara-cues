@@ -145,6 +145,11 @@ h1,h2,h3,p{margin:0}
 .countdown{font-family:var(--display);font-size:25px;color:var(--accent)}
 .rsvp{display:flex;gap:8px}
 .rsvp .btn{flex:1;font-size:14px;padding:0 10px}
+.rsvp .btn[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.rsvp-roster{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:14px}
+.rsvp-roster>div{min-width:0}
+.rsvp-roster b{display:block;margin-bottom:3px}
+.rsvp-roster p{color:var(--muted);overflow-wrap:anywhere}
 .attendee-list{flex-wrap:wrap;overflow:visible}
 .attendee-list .chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 
