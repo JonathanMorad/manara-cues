@@ -44,6 +44,17 @@ h1,h2,h3,p{margin:0}
 /* cards and lists */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .card h3{font-family:var(--display);font-weight:700;font-size:22px}
+.home-coming .home-calendar-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font-weight:500;white-space:nowrap}
+.home-coming .home-coming-feature{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.home-coming .home-coming-until{margin-left:auto;color:var(--accent);font-size:13px;font-weight:600}
+.home-coming .home-coming-title{font-size:21px;line-height:1.15}
+.home-coming .home-coming-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--line)}
+.home-coming .home-coming-date{width:34px;flex:none;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.home-coming .home-coming-date b{font-family:var(--display);font-size:19px}
+.home-coming .home-coming-date small{font-size:10px;color:var(--muted);text-transform:uppercase}
+.home-coming .home-coming-copy{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.home-coming .home-coming-copy b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-coming .home-coming-copy small{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .count{font-family:var(--display);font-weight:700;font-size:44px;line-height:1}
 .row{display:flex;align-items:center;gap:10px}
 .grow{flex:1;min-width:0}

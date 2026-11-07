@@ -36,6 +36,7 @@ function isDirector(){ return isAdmin()||myRoles().indexOf("director")>-1; }
 function canEditDept(d){ return isDirector()||myRoles().indexOf(d)>-1; }
 function canEditScript(){ return isDirector()||myRoles().indexOf("writer")>-1; }
 function myDepts(){ if(isDirector()) return ["sound","lighting"]; return myRoles().filter(function(r){ return r==="sound"||r==="lighting"; }); }
+function canRunLiveMode(){ return isDirector()||myRoles().indexOf("sound")>-1||myRoles().indexOf("lighting")>-1; }
 function scene(){ var p=prod(); if(!p) return null; for(var i=0;i<p.scenes.length;i++) if(p.scenes[i].id===S.sceneId) return p.scenes[i]; S.sceneId=p.scenes[0]?p.scenes[0].id:null; return p.scenes[0]||null; }
 function sceneIndex(id){ var p=prod(); if(!p) return 99; for(var i=0;i<p.scenes.length;i++) if(p.scenes[i].id===id) return i; return 99; }
 function sortedCues(dept){
@@ -70,6 +71,7 @@ function applyLanguage(){
 }
 Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"مشاهد","people":"أشخاص","Tomorrow":"غدًا","No upcoming dates yet.":"لا توجد مواعيد قادمة.","Nothing from the director yet.":"لا توجد ملاحظات من المخرج بعد.","See all notes":"عرض كل الملاحظات","Open Live mode":"افتح وضع العرض","Overview":"نظرة عامة","Scenes":"المشاهد","Add a scene to start the script.":"أضف مشهدًا لبدء النص.","The director has not added this scene’s script yet.":"لم يضف المخرج نص هذا المشهد بعد.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Only you can see this note.":"لا يرى هذه الملاحظة سواك.","Private notes are only visible to you. Notes you send to a person are visible to them and to you.":"لا يطلع على ملاحظاتك الخاصة سواك. الملاحظات المرسلة لشخص يراها هو وأنت.","Notes from the director appear here.":"تظهر هنا ملاحظات المخرج.","No dates yet. A director can add rehearsals and production dates.":"لا توجد مواعيد بعد. يمكن للمخرج إضافة البروفات والعروض.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","No rehearsals or production dates yet. A director can add the first date.":"لا توجد بروفات أو عروض بعد. يمكن للمخرج إضافة أول موعد.","All production members":"كل أعضاء الإنتاج","Add a date":"أضف موعدًا","Name":"الاسم","Date":"التاريخ","Time":"الوقت","Production":"عرض","Edit date":"تعديل الموعد","Save date":"حفظ الموعد","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","Director":"مخرج","Edit production and scenes":"تعديل الإنتاج والمشاهد","Add rehearsal":"أضف بروفة","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","Select a department":"اختر القسم","Department":"القسم","Sound":"صوت","Lighting":"إضاءة","Delete cue":"حذف الإشارة","Duplicate":"نسخ","Save cue":"حفظ الإشارة","Scene script":"نص المشهد","Paste or type the script for this scene":"الصق أو اكتب نص هذا المشهد","Save script":"حفظ النص","Edit script":"تعديل النص","Add script":"أضف النص","Roles in":"الأدوار في","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","The code needs at least 6 characters.":"يجب أن يتكون الرمز من 6 أحرف على الأقل.","Enter a name and a username (letters and numbers).":"أدخل الاسم واسم المستخدم (حروف وأرقام).","The production needs a name.":"يجب إدخال اسم للإنتاج.","Name at least one scene.":"أدخل اسمًا لمشهد واحد على الأقل.","Keep at least one named scene.":"يجب الإبقاء على مشهد واحد مسمّى على الأقل.","Create the first one.":"أنشئ أول إنتاج.","You are not in any production yet. Ask your director or admin to add you.":"لست ضمن أي إنتاج بعد. اطلب من المخرج أو المشرف إضافتك.","This production has no scenes yet.":"لا توجد مشاهد في هذا الإنتاج بعد.","Someone":"شخص","Switch to light mode":"التبديل إلى الوضع الفاتح","Switch to dark mode":"التبديل إلى الوضع الداكن","Your profile":"ملفك الشخصي","Choose a production":"اختر إنتاجًا","Scenes":"المشاهد","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت"});
 AR_TEXT["Account codes are managed by admins. Contact an admin if you need help signing in."]="يتولى المشرفون إدارة رموز الدخول. تواصل مع أحدهم إذا احتجت إلى مساعدة في تسجيل الدخول.";
+AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
 
 /* ===== logo ===== */
 function logo(size){
@@ -181,12 +183,21 @@ function allVisibleEvents(){
 function eventsOn(key){ return allVisibleEvents().filter(function(e){ return dayKey(e.startsAt)===key; }).sort(function(a,b){return a.startsAt-b.startsAt;}); }
 function nextEvent(pid){ return allVisibleEvents().filter(function(e){ return (!pid||(e.pid||S.pid)===pid)&&e.startsAt>=Date.now(); }).sort(function(a,b){ return a.startsAt-b.startsAt; })[0]||null; }
 function renderHome(p){
-  var r=myRoles(), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).sort(function(a,b){ return b.at-a.at; }).slice(0,3), next=nextEvent();
+  var r=myRoles(), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).sort(function(a,b){ return b.at-a.at; }).slice(0,3), upcoming=allVisibleEvents().filter(function(e){ return e.startsAt>=Date.now(); }).sort(function(a,b){ return a.startsAt-b.startsAt; });
+  var next=upcoming[0];
   var h='<h1 class="h1">'+(S.lang==="ar"?'مرحبًا، ':'Hi, ')+esc(S.user.name.split(" ")[0])+'</h1>';
   h+='<div class="card"><div class="row"><h3 class="grow">'+esc(p.name)+'</h3><span class="badge">'+esc(r.length?roleLabel(r):(isAdmin()?"Admin":"Member"))+'</span></div>'
     +'<p class="muted small">'+productionCountText(p)+'</p></div>';
-  h+='<div class="card"><div class="row"><h3 class="grow">Coming up</h3><button class="small muted" data-act="tab" data-t="calendar">Calendar</button></div>';
-  if(next){ var scope=next.pid&&next.pid!==S.pid?(next.productionName||"Another production")+' · ':''; h+='<b>'+esc(next.title)+'</b><p class="muted small">'+esc(scope+dateLabel(next.startsAt))+' · '+relativeDate(next.startsAt)+'</p>'; }
+  h+='<div class="card home-coming"><div class="row"><h3 class="grow">Coming up</h3><button class="small muted home-calendar-link" data-act="tab" data-t="calendar">Go to calendar <span aria-hidden="true">→</span></button></div>';
+  if(next){
+    var scope=next.pid&&next.pid!==S.pid?(next.productionName||"Another production")+' · ':'';
+    h+='<div class="home-coming-feature"><div class="row"><span class="event-kind '+(next.kind==="show"?'show':'rehearsal')+'"><i></i>'+(next.kind==="show"?'Production / show':'Rehearsal')+'</span><span class="home-coming-until">'+esc(relativeDate(next.startsAt))+'</span></div>'
+      +'<b class="home-coming-title">'+esc(next.title)+'</b><p class="muted small">'+esc(scope+dateLabel(next.startsAt))+'</p></div>';
+    upcoming.slice(1,3).forEach(function(e){
+      var otherScope=e.pid&&e.pid!==S.pid?(e.productionName||"Another production")+' · ':'';
+      h+='<div class="home-coming-row"><span class="home-coming-date"><b>'+esc(new Date(e.startsAt).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{day:"numeric"}))+'</b><small>'+esc(new Date(e.startsAt).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{month:"short"}))+'</small></span><span class="home-coming-copy"><b>'+esc(e.title)+'</b><small>'+esc(otherScope+dateLabel(e.startsAt))+'</small></span><span class="event-kind '+(e.kind==="show"?'show':'rehearsal')+'"><i></i>'+(e.kind==="show"?'Production / show':'Rehearsal')+'</span></div>';
+    });
+  }
   else h+='<p class="muted">No upcoming dates yet.</p>';
   h+='</div>';
   h+='<div class="card"><h3>Notes for you</h3>';
@@ -194,8 +205,6 @@ function renderHome(p){
   mine.forEach(function(n){ h+=noteHtml(n,false); });
   if(mine.length) h+='<button class="btn block" data-act="go-notes">See all notes</button>';
   h+='</div>';
-  var d=myDepts();
-  if(d.length) h+='<button class="btn primary block" data-act="open-live">Open Live mode</button>';
   return h;
 }
 
@@ -214,7 +223,7 @@ function renderProduction(p){
   var from=order.indexOf(S.prodView)>=order.indexOf(S.lastProdView)?"16px":"-16px", content="";
   if(S.prodView==="overview") content=renderProductionOverview(p);
   else if(S.prodView==="script") content=sceneChips(p)+renderScript(p);
-  else if(S.prodView==="cues") content=sceneChips(p)+renderCues(p);
+  else if(S.prodView==="cues") content=sceneChips(p)+(canRunLiveMode()?'<button class="btn primary block" data-act="open-live">Open Live mode</button>':'')+renderCues(p);
   else content=sceneChips(p)+renderNotes(p,scene());
   S.lastProdView=null;
   return h+'<div class="prod-tab-content'+(changed?' prod-tab-slide':'')+'" style="--slide-from:'+from+'">'+content+'</div>';
