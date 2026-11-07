@@ -41,7 +41,6 @@ function makeDemo(){
       if(byName(o.username)) return Promise.reject(fail("taken","That username is already taken."));
       var id = uid(); d.users[id] = {uid:id, username:cleanUsername(o.username), name:o.name, isAdmin:!!o.isAdmin, code:o.code}; save(); return Promise.resolve(id);
     },
-    changeCode:function(uid_, newCode){ if(d.users[uid_]){ d.users[uid_].code = newCode; save(); } return Promise.resolve(); },
     watchUsers:function(cb){ return watch(function(){ return Object.keys(d.users).map(function(k){ return pub(d.users[k]); }); }, cb); },
     watchProductions:function(user, cb){
       return watch(function(){ return Object.keys(d.prods).map(function(k){ return d.prods[k]; }).filter(function(p){ return user.isAdmin || (p.memberIds||[]).indexOf(user.uid)>-1; }); }, cb);
@@ -126,7 +125,6 @@ async function makeFirebase(cfg){
       await F.setDoc(F.doc(db,"users",cred.user.uid), {uid:cred.user.uid, username:cleanUsername(o.username), name:o.name, isAdmin:!!o.isAdmin});
       return cred.user.uid;
     })()); },
-    changeCode:function(uid, newCode){ return wrap(Au.updatePassword(auth.currentUser, newCode)); },
     watchUsers:function(cb){ return F.onSnapshot(F.collection(db,"users"), function(s){ cb(docs(s)); }, function(){}); },
     watchProductions:function(user, cb){
       var q = user.isAdmin ? F.collection(db,"productions") : F.query(F.collection(db,"productions"), F.where("memberIds","array-contains",user.uid));

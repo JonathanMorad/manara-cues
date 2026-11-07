@@ -69,6 +69,7 @@ function applyLanguage(){
   app.querySelectorAll("[aria-label],[title],[placeholder]").forEach(function(el){["aria-label","title","placeholder"].forEach(function(a){var v=el.getAttribute(a);if(v&&AR_TEXT[v])el.setAttribute(a,AR_TEXT[v]);});});
 }
 Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"مشاهد","people":"أشخاص","Tomorrow":"غدًا","No upcoming dates yet.":"لا توجد مواعيد قادمة.","Nothing from the director yet.":"لا توجد ملاحظات من المخرج بعد.","See all notes":"عرض كل الملاحظات","Open Live mode":"افتح وضع العرض","Overview":"نظرة عامة","Scenes":"المشاهد","Add a scene to start the script.":"أضف مشهدًا لبدء النص.","The director has not added this scene’s script yet.":"لم يضف المخرج نص هذا المشهد بعد.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Only you can see this note.":"لا يرى هذه الملاحظة سواك.","Private notes are only visible to you. Notes you send to a person are visible to them and to you.":"لا يطلع على ملاحظاتك الخاصة سواك. الملاحظات المرسلة لشخص يراها هو وأنت.","Notes from the director appear here.":"تظهر هنا ملاحظات المخرج.","No dates yet. A director can add rehearsals and production dates.":"لا توجد مواعيد بعد. يمكن للمخرج إضافة البروفات والعروض.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","No rehearsals or production dates yet. A director can add the first date.":"لا توجد بروفات أو عروض بعد. يمكن للمخرج إضافة أول موعد.","All production members":"كل أعضاء الإنتاج","Add a date":"أضف موعدًا","Name":"الاسم","Date":"التاريخ","Time":"الوقت","Production":"عرض","Edit date":"تعديل الموعد","Save date":"حفظ الموعد","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","Director":"مخرج","Edit production and scenes":"تعديل الإنتاج والمشاهد","Add rehearsal":"أضف بروفة","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","Select a department":"اختر القسم","Department":"القسم","Sound":"صوت","Lighting":"إضاءة","Delete cue":"حذف الإشارة","Duplicate":"نسخ","Save cue":"حفظ الإشارة","Scene script":"نص المشهد","Paste or type the script for this scene":"الصق أو اكتب نص هذا المشهد","Save script":"حفظ النص","Edit script":"تعديل النص","Add script":"أضف النص","Roles in":"الأدوار في","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","The code needs at least 6 characters.":"يجب أن يتكون الرمز من 6 أحرف على الأقل.","Enter a name and a username (letters and numbers).":"أدخل الاسم واسم المستخدم (حروف وأرقام).","The production needs a name.":"يجب إدخال اسم للإنتاج.","Name at least one scene.":"أدخل اسمًا لمشهد واحد على الأقل.","Keep at least one named scene.":"يجب الإبقاء على مشهد واحد مسمّى على الأقل.","Create the first one.":"أنشئ أول إنتاج.","You are not in any production yet. Ask your director or admin to add you.":"لست ضمن أي إنتاج بعد. اطلب من المخرج أو المشرف إضافتك.","This production has no scenes yet.":"لا توجد مشاهد في هذا الإنتاج بعد.","Someone":"شخص","Switch to light mode":"التبديل إلى الوضع الفاتح","Switch to dark mode":"التبديل إلى الوضع الداكن","Your profile":"ملفك الشخصي","Choose a production":"اختر إنتاجًا","Scenes":"المشاهد","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت"});
+AR_TEXT["Account codes are managed by admins. Contact an admin if you need help signing in."]="يتولى المشرفون إدارة رموز الدخول. تواصل مع أحدهم إذا احتجت إلى مساعدة في تسجيل الدخول.";
 
 /* ===== logo ===== */
 function logo(size){
@@ -332,7 +333,8 @@ function renderNotes(p,s){
 function renderTeam(p){
   var h='<h1 class="h1">Team</h1>';
   h+='<div class="card"><div class="row"><div class="avatar">'+esc(initials(S.user.name))+'</div><div class="grow"><b>'+esc(S.user.name)+'</b><p class="muted small">@'+esc(S.user.username)+(isAdmin()?' · Admin':'')+'</p></div></div>'
-    +'<div class="sheetrow"><button class="btn" data-act="change-code">Change my code</button><button class="btn" data-act="logout">Sign out</button></div></div>';
+    +'<p class="hint">Account codes are managed by admins. Contact an admin if you need help signing in.</p>'
+    +'<div class="sheetrow"><button class="btn" data-act="logout">Sign out</button></div></div>';
   if(p){
     h+='<div class="row"><h3 class="grow" style="font-family:var(--display);font-size:24px">In '+esc(p.name)+'</h3>'+(isDirector()?'<button class="btn" data-act="add-member">'+ic("plus",18)+' Add</button>':'')+'</div>';
     var ids=Object.keys(p.members||{});
@@ -446,7 +448,7 @@ function renderSheet(){
     h+='<h2>New person</h2>';
     if(sh.created){
       h+='<div class="card"><p class="ok">Account created.</p><p>Give '+esc(sh.created.name)+' these details:</p><p><b>Username:</b> '+esc(sh.created.username)+'<br><b>Code:</b> '+esc(sh.created.code)+'</p>'
-        +'<p class="hint">Write the code down now. For safety it cannot be shown again, and only they can change it later.</p></div>'
+        +'<p class="hint">Write the code down now. It cannot be shown again. Only an admin can issue account codes.</p></div>'
         +'<button class="btn primary block" data-act="copy-creds">Copy details</button><button class="btn block" data-act="close">Done</button>';
     }else{
       h+=field("name","Full name",sh.name,"e.g. Mariam Samir")+field("username","Username",sh.username,"e.g. mariam",{nocap:true})
@@ -482,9 +484,6 @@ function renderSheet(){
       +Object.keys(p.members||{}).filter(function(id){return roleList(p.members[id]).indexOf("director")===-1;}).map(function(id){ return '<button class="chip" data-act="event-attendee" data-id="'+id+'" aria-pressed="'+(sh.memberIds.indexOf(id)>-1)+'">'+esc(nameOf(id))+'</button>'; }).join('')
       +'</div><p class="hint">'+(sh.kind==="show"?'Show dates are visible to all Manara users. Only selected production members can RSVP.':'Only selected people in this production can see this rehearsal. Directors are always included.')+'</p></div>'
       +(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')+rowBtns("Cancel","save-event","Save date");
-  }
-  else if(sh.type==="code"){
-    h+='<h2>Change my code</h2>'+field("code","New code (at least 6 characters)",sh.code,"",{nocap:true,last:true})+(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')+(sh.ok?'<p class="ok">Code changed.</p>':'')+rowBtns("Close","save-code","Change code");
   }
   h+='</div></div>';
   return h;
@@ -656,11 +655,6 @@ function handle(act, el){
     case "copy-creds":
       var cr=S.sheet.created, txt="Manara app\nUsername: "+cr.username+"\nCode: "+cr.code;
       try{ if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ toast("Copied"); },function(){ toast("Could not copy. Write it down."); }); else toast("Write it down."); }catch(e){ toast("Write it down."); }
-      break;
-    case "change-code": openSheet({type:"code",code:"",err:"",ok:false}); break;
-    case "save-code":
-      if((S.sheet.code||"").length<6){ S.sheet.err="The code needs at least 6 characters."; render(); break; }
-      DB.changeCode(S.user.uid,S.sheet.code).then(function(){ S.sheet.err=""; S.sheet.ok=true; S.sheet.code=""; render(); }).catch(function(e){ S.sheet.err=err(e); render(); });
       break;
 
     case "add-cue":
