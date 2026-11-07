@@ -13,7 +13,7 @@ var SWATCHES = ["#FFFFFF","#FFD27A","#FF8A3D","#E5484D","#E255A1","#8E6BFF","#3E
 /* ===== state ===== */
 var DB = null;
 var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], responses:{}, scripts:[],
-  tab:"home", prodView:"overview", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
+  tab:"home", prodView:"overview", calMonth:null, calSelected:"", calMode:"month", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
 var unsub = {users:null, prods:null, cues:null, notes:null, events:null, scripts:null, responses:{}};
 
 /* ===== helpers ===== */
@@ -130,6 +130,10 @@ function daysUntil(ms){ var a=new Date(), b=new Date(ms); a.setHours(0,0,0,0); b
 function dateLabel(ms){ return new Date(ms).toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }
 function dateInputValue(ms){ var d=new Date(ms); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function timeInputValue(ms){ var d=new Date(ms); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function dayKey(ms){ return dateInputValue(ms); }
+function dateFromKey(key){ var a=String(key||"").split("-").map(Number); return new Date(a[0],a[1]-1,a[2]); }
+function calendarTitle(d){ return d.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
+function eventsOn(key){ return S.events.filter(function(e){ return dayKey(e.startsAt)===key; }).sort(function(a,b){return a.startsAt-b.startsAt;}); }
 function nextEvent(){ return S.events.filter(function(e){ return e.startsAt>=Date.now(); }).sort(function(a,b){ return a.startsAt-b.startsAt; })[0]||null; }
 function renderHome(p){
   var r=myRoles(), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).sort(function(a,b){ return b.at-a.at; }).slice(0,3), next=nextEvent();
@@ -183,19 +187,41 @@ function renderScript(p){
   return h+'</div>';
 }
 function renderCalendar(p){
-  var events=S.events.slice().sort(function(a,b){return a.startsAt-b.startsAt;}), h='<div class="row"><h1 class="h1 grow">Calendar</h1>'+(isDirector()?'<button class="btn primary" data-act="new-event">'+ic("plus",18)+' Add date</button>':'')+'</div>';
-  if(!events.length) return h+'<div class="empty">No rehearsals or production dates yet.</div>';
-  events.forEach(function(e){
-    var rs=S.responses[e.id]||[], yes=rs.filter(function(r){return r.response==="going";}).length, no=rs.filter(function(r){return r.response==="not-going";}).length;
-    var mine=rs.filter(function(r){return r.uid===S.user.uid;})[0], invite=(e.memberIds||[]).indexOf(S.user.uid)>-1, days=daysUntil(e.startsAt);
-    h+='<article class="card event-card"><div class="row"><span class="event-kind">'+(e.kind==="show"?'Production':'Rehearsal')+'</span><span class="grow"></span>'+(isDirector()?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
-    h+='<h3>'+esc(e.title)+'</h3><p class="muted small">'+esc(dateLabel(e.startsAt))+'</p><b class="countdown">'+(days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days away')+'</b>';
-    h+='<p class="muted small">'+yes+' going · '+no+' can’t make it</p>';
-    if(invite) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going")+'">I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going")+'">Can’t make it</button></div>';
-    else h+='<p class="hint">This date is for selected team members.</p>';
-    h+='</article>';
-  });
+  var now=new Date(), today=dayKey(now.getTime());
+  if(!S.calMonth) S.calMonth=new Date(now.getFullYear(),now.getMonth(),1);
+  if(!S.calSelected) S.calSelected=today;
+  var m=S.calMonth, first=new Date(m.getFullYear(),m.getMonth(),1), offset=first.getDay(), total=new Date(m.getFullYear(),m.getMonth()+1,0).getDate(), cells=Math.ceil((offset+total)/7)*7;
+  var all=S.events.slice().sort(function(a,b){return a.startsAt-b.startsAt;}), h='<div class="row"><h1 class="h1 grow">Calendar</h1>'+(isDirector()?'<button class="btn primary" data-act="new-event">'+ic("plus",18)+' Add date</button>':'')+'</div>';
+  h+='<div class="cal-legend"><span><i class="rehearsal"></i> Rehearsal</span><span><i class="show"></i> Production / show</span></div>';
+  h+='<div class="seg cal-mode" role="group" aria-label="Calendar view"><button data-act="cal-mode" data-v="month" aria-pressed="'+(S.calMode==="month")+'">Month</button><button data-act="cal-mode" data-v="agenda" aria-pressed="'+(S.calMode==="agenda")+'">Agenda</button></div>';
+  if(S.calMode==="month"){
+    h+='<section class="card month-card" aria-label="'+esc(calendarTitle(m))+'"><div class="month-head"><button class="month-arrow" data-act="cal-nav" data-d="-1" aria-label="Previous month">‹</button><h2>'+esc(calendarTitle(m))+'</h2><button class="month-arrow" data-act="cal-nav" data-d="1" aria-label="Next month">›</button></div>';
+    h+='<div class="month-weekdays" aria-hidden="true">'+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(function(x){return '<span>'+x+'</span>';}).join('')+'</div><div class="month-grid">';
+    for(var i=0;i<cells;i++){
+      var day=i-offset+1, inMonth=day>0&&day<=total, cellDate=new Date(m.getFullYear(),m.getMonth(),day), key=dayKey(cellDate.getTime()), dayEvents=inMonth?eventsOn(key):[], labels=dayEvents.map(function(e){return (e.kind==="show"?"Production/show":"Rehearsal")+": "+e.title;}).join(", ");
+      h+='<button class="cal-day'+(inMonth?'':' outside')+(key===S.calSelected?' selected':'')+(key===today?' today':'')+'" data-act="cal-day" data-date="'+key+'"'+(inMonth?'':' disabled')+' aria-label="'+esc(inMonth?cellDate.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+(labels?"; "+labels:"; no dates"):"")+'" aria-pressed="'+(key===S.calSelected)+'">'
+        +'<span class="cal-num">'+(inMonth?day:'')+'</span>'+(dayEvents.length?'<span class="cal-dots">'+dayEvents.slice(0,3).map(function(e){return '<i class="'+(e.kind==="show"?'show':'rehearsal')+'"></i>';}).join('')+(dayEvents.length>3?'<b>+'+(dayEvents.length-3)+'</b>':'')+'</span>':'<span class="cal-dots blank"></span>')+'</button>';
+    }
+    h+='</div><div class="month-foot"><span>'+esc(calendarTitle(m))+'</span><button class="small muted" data-act="cal-today">Today</button></div></section>';
+    var selected=dateFromKey(S.calSelected), selectedEvents=eventsOn(S.calSelected);
+    h+='<div class="row day-heading"><h2 class="grow">'+esc(selected.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2><span class="muted small">'+selectedEvents.length+' date'+(selectedEvents.length===1?'':'s')+'</span></div>';
+    if(!selectedEvents.length) h+='<div class="empty">'+(all.length?'Nothing scheduled for this day.':'No dates yet. A director can add rehearsals and production dates.')+'</div>';
+    selectedEvents.forEach(function(e){h+=renderCalendarEvent(e);});
+  }else{
+    if(!all.length) h+='<div class="empty">No rehearsals or production dates yet. A director can add the first date.</div>';
+    all.forEach(function(e){h+=renderCalendarEvent(e);});
+  }
   return h;
+}
+function renderCalendarEvent(e){
+  var rs=S.responses[e.id]||[], yes=rs.filter(function(r){return r.response==="going";}).length, no=rs.filter(function(r){return r.response==="not-going";}).length;
+  var mine=rs.filter(function(r){return r.uid===S.user.uid;})[0], invite=(e.memberIds||[]).indexOf(S.user.uid)>-1, days=daysUntil(e.startsAt), show=e.kind==="show";
+  var h='<article class="card event-card '+(show?'event-show':'event-rehearsal')+'"><div class="row"><span class="event-kind '+(show?'show':'rehearsal')+'"><i></i>'+(show?'Production / show':'Rehearsal')+'</span><span class="grow"></span>'+(isDirector()?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
+  h+='<h3>'+esc(e.title)+'</h3><p class="muted small">'+esc(dateLabel(e.startsAt))+'</p><b class="countdown">'+(days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days away')+'</b>';
+  h+='<p class="muted small">'+yes+' going · '+no+' can’t make it</p>';
+  if(invite) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going")+'">I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going")+'">Can’t make it</button></div>';
+  else h+='<p class="hint">This date is for selected team members.</p>';
+  return h+'</article>';
 }
 
 /* --- role-specific cues --- */
@@ -483,7 +509,11 @@ function handle(act, el){
       DB.setupAdmin({name:nm.trim(),username:un,code:cd}).then(function(){ S.needsSetup=false; }).catch(function(e){ S.busy=false; S.authErr=err(e); render(); });
       break;
     case "logout": DB.logout(); break;
-    case "tab": S.tab=el.getAttribute("data-t"); render(); window.scrollTo(0,0); break;
+    case "tab": S.tab=el.getAttribute("data-t"); if(S.tab==="calendar"&&!S.calMonth){var cd0=new Date();S.calMonth=new Date(cd0.getFullYear(),cd0.getMonth(),1);S.calSelected=dayKey(cd0.getTime());} render(); window.scrollTo(0,0); break;
+    case "cal-mode": S.calMode=el.getAttribute("data-v"); render(); break;
+    case "cal-day": S.calSelected=el.getAttribute("data-date"); render(); break;
+    case "cal-nav": var dm=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+parseInt(el.getAttribute("data-d"),10),1); S.calMonth=dm; S.calSelected=dayKey(dm.getTime()); render(); break;
+    case "cal-today": var td=new Date(); S.calMonth=new Date(td.getFullYear(),td.getMonth(),1); S.calSelected=dayKey(td.getTime()); render(); break;
     case "prod-view": S.tab="production"; S.prodView=el.getAttribute("data-v"); render(); window.scrollTo(0,0); break;
     case "go-notes": S.tab="production"; S.prodView="notes"; render(); break;
     case "dept": S.dept=el.getAttribute("data-d"); render(); break;

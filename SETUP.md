@@ -13,7 +13,7 @@ As admin, open **Team** to create accounts. Give each person their username and 
 ## Using the app
 
 - **Home** shows your next date and notes sent to you.
-- **Calendar** has rehearsals and production dates. A director can select which people see each date; invited people can reply whether they are going.
+- **Calendar** has a month grid and agenda view. Teal marks rehearsals; amber marks production dates and shows. Tap a day to see its details. A director can select who sees each date, and invited people can reply whether they are going.
 - **Production** contains scene scripts, role-specific cues, and rehearsal notes. Directors can add script text scene by scene. Scripts are shared with production members; personal notes stay private to their author and recipient.
 - **Team** manages production members and roles. Admins can create accounts and productions.
 
