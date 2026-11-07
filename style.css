@@ -272,6 +272,8 @@ h1,h2,h3,p{margin:0}
 .highlight-color.yellow{--mark-color:#E7C64B}.highlight-color.green{--mark-color:#62A878}.highlight-color.pink{--mark-color:#DA7799}.highlight-color.blue{--mark-color:#6597D0}
 [dir="rtl"] .script-text{direction:rtl;unicode-bidi:plaintext;text-align:right}
 [dir="rtl"] .month-weekdays,[dir="rtl"] .month-grid{direction:rtl}
+[dir="rtl"] .auth form,[dir="rtl"] .auth .box{text-align:right}
+[dir="rtl"] input[data-f="username"],[dir="rtl"] input[data-f="code"]{direction:ltr;text-align:left}
 .highlight-clear{min-height:34px;padding:0 9px;border:0;background:transparent;color:var(--muted);font-size:12px}
 .script-highlight{border-radius:3px;padding:0 .04em;color:inherit;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .script-highlight.yellow{background:#F5E3A2}.script-highlight.green{background:#CBE8D1}.script-highlight.pink{background:#F6D2DE}.script-highlight.blue{background:#D1E1F6}
