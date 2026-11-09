@@ -60,7 +60,7 @@ function applyTheme(){
   var meta=document.querySelector('meta[name="theme-color"]');
   if(meta) meta.content=effectiveTheme()==="dark"?"#111214":"#F1F0ED";
 }
-var AR_TEXT={"Loading…":"جارٍ التحميل…","Username":"اسم المستخدم","Passcode":"رمز الدخول","Sign in":"تسجيل الدخول","Your username and passcode come from your team admin.":"تحصل على اسم المستخدم ورمز الدخول من مسؤول الفريق.","Current production":"الإنتاج الحالي","No production selected":"لم يتم اختيار إنتاج","Productions":"الإنتاجات","Choose a production":"اختر إنتاجًا","No productions yet.":"لا توجد إنتاجات بعد.","New production":"إنتاج جديد","Home":"الرئيسية","Calendar":"التقويم","Production":"الإنتاج","Team":"الفريق","Your part":"دورك","Next date":"الموعد القادم","Production materials":"مواد الإنتاج","Read the script, your role cues, and rehearsal notes in one place.":"اقرأ النص وإشارات دورك وملاحظات البروفات في مكان واحد.","Open calendar":"افتح التقويم","Nothing scheduled yet.":"لا توجد مواعيد بعد.","Script":"النص","Cues":"الإشارات","Notes":"الملاحظات","Rehearsal":"بروفة","Production / show":"عرض","Month":"شهر","Agenda":"قائمة","Today":"اليوم","Add date":"أضف موعدًا","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","This rehearsal is for selected members of this production.":"هذه البروفة مخصصة للأعضاء المحددين في هذا الإنتاج.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Yellow":"أصفر","Green":"أخضر","Pink":"وردي","Blue":"أزرق","Clear mine":"امسح تمييزاتي","Edit":"تعديل","Add text":"أضف النص","Change my code":"غيّر رمز دخولي","Sign out":"تسجيل الخروج","Add":"إضافة","Everyone with an account":"كل أصحاب الحسابات","New person":"شخص جديد","Nobody added yet.":"لم تتم إضافة أحد بعد.","Rename production or edit scenes":"غيّر اسم الإنتاج أو عدّل المشاهد","Edit production":"تعديل الإنتاج","Production name":"اسم الإنتاج","Scenes":"المشاهد","Type a scene name, then press Next. Add or move scenes with the controls.":"اكتب اسم المشهد ثم اضغط التالي. أضف المشاهد أو حرّكها باستخدام الأزرار.","Cancel":"إلغاء","Create":"إنشاء","Save":"حفظ","Roles":"الأدوار","A person can have more than one role in this production.":"يمكن للشخص أن يؤدي أكثر من دور في هذا الإنتاج.","Save roles":"حفظ الأدوار","Remove from production":"إزالة من الإنتاج","Tap again to remove":"اضغط مرة أخرى للإزالة","Character / part in this production":"الشخصية / الدور في هذا الإنتاج","e.g. Layla":"مثال: ليلى","Assign the character or part this person plays in this production.":"حدد الشخصية أو الدور الذي يؤديه هذا الشخص في هذا الإنتاج.","Director":"مخرج","Actor":"ممثل","Writer":"كاتب","Sound":"صوت","Lighting":"إضاءة","Member":"عضو","Admin":"مشرف","Close":"إغلاق","Everyone with an account is already in this production. An admin can create new accounts in the Team tab.":"كل أصحاب الحسابات موجودون بالفعل في هذا الإنتاج. يمكن للمشرف إنشاء حسابات جديدة من صفحة الفريق.","Choose every role this person has in this production.":"اختر كل الأدوار التي يؤديها هذا الشخص في هذا الإنتاج.","Choose a person and at least one role.":"اختر شخصًا ودورًا واحدًا على الأقل.","Choose at least one role.":"اختر دورًا واحدًا على الأقل.","Playing:":"يجسد شخصية:","Add cue":"أضف إشارة","Add note":"أضف ملاحظة","Notes for you":"ملاحظات لك","Private notes are only visible to you.":"الملاحظات الخاصة لا يراها سواك.","To myself":"لنفسي","To a person":"لشخص","Send to":"إرسال إلى","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Who can RSVP?":"من يمكنه تأكيد الحضور؟","Who should see this rehearsal?":"من يمكنه رؤية هذه البروفة؟","All production members":"كل أعضاء الإنتاج","Clear selection":"إلغاء التحديد","Show dates are visible to all Manara users. Only selected production members can RSVP.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. يمكن لأعضاء الإنتاج المحددين تأكيد الحضور.","Only selected people in this production can see this rehearsal. Directors are always included.":"الأشخاص المحددون فقط في هذا الإنتاج يرون هذه البروفة. يُضاف المخرجون دائمًا.","Create admin":"إنشاء حساب المشرف","First-time setup":"الإعداد الأول","Create the admin account. You will use it to add everyone else.":"أنشئ حساب المشرف، وستستخدمه لإضافة بقية الفريق.","Your name":"اسمك","Code (at least 6 characters)":"رمز الدخول (6 أحرف على الأقل)","Writer":"كاتب","Arabic":"عربي","Switch language":"تغيير اللغة","☼ Light":"☼ فاتح","◐ Dark":"◐ داكن","Previous month":"الشهر السابق","Next month":"الشهر التالي","Previous scene":"المشهد السابق","Next scene":"المشهد التالي","Sound":"صوت","Lighting":"إضاءة","All":"الكل","Play":"تشغيل","Fade in":"زيادة تدريجية","Fade out":"خفض تدريجي","Volume up":"رفع الصوت","Volume down":"خفض الصوت","Stop":"إيقاف","Flicker":"وميض","Account created.":"تم إنشاء الحساب.","Full name":"الاسم الكامل","Also make this person an admin":"اجعل هذا الشخص مشرفًا أيضًا","Create account":"إنشاء الحساب","Details":"التفاصيل","Private":"خاص","To myself":"لنفسي","To a person":"لشخص","New note":"ملاحظة جديدة","New cue":"إشارة جديدة","Save cue":"حفظ الإشارة","Trigger (the line or action that cues it)":"المحفّز (الجملة أو الحركة التي تبدأ الإشارة)","Track or sound":"المسار أو الصوت","Note for the booth":"ملاحظة لمقصورة التحكم","Who is it for":"لمن هذه الملاحظة؟","Add rehearsal":"أضف بروفة","Edit date":"تعديل الموعد","Delete":"حذف","Going":"سأحضر","Not going":"لن أحضر","Days until":"الأيام المتبقية","Search":"بحث","Save date":"حفظ الموعد","Rehearsal / show":"بروفة / عرض","Writing":"كتابة","Copy details":"نسخ التفاصيل","Done":"تم"};
+var AR_TEXT={"Loading…":"جارٍ التحميل…","Username":"اسم المستخدم","Passcode":"رمز الدخول","Sign in":"تسجيل الدخول","Your username and passcode come from your team admin.":"تحصل على اسم المستخدم ورمز الدخول من مسؤول الفريق.","Current show":"العرض الحالي","No show selected":"لم يتم اختيار عرض","Shows":"العروض","Choose a show":"اختر عرضًا","No shows yet.":"لا توجد عروض بعد.","New show":"عرض جديد","Home":"الرئيسية","Calendar":"التقويم","Show":"العرض","Team":"الفريق","Your part":"دورك","Next date":"الموعد القادم","Show materials":"مواد العرض","Read the script, your role cues, and rehearsal notes in one place.":"اقرأ النص وإشارات دورك وملاحظات البروفات في مكان واحد.","Open calendar":"افتح التقويم","Nothing scheduled yet.":"لا توجد مواعيد بعد.","Script":"النص","Cues":"الإشارات","Notes":"الملاحظات","Rehearsal":"بروفة","Show":"العرض","Month":"شهر","Agenda":"قائمة","Today":"اليوم","Add date":"أضف موعدًا","Visible to all Manara users. RSVPs are for members of this show.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا العرض.","This rehearsal is for selected members of this show.":"هذه البروفة مخصصة للأعضاء المحددين في هذا العرض.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Yellow":"أصفر","Green":"أخضر","Pink":"وردي","Blue":"أزرق","Clear mine":"امسح تمييزاتي","Edit":"تعديل","Add text":"أضف النص","Change my code":"غيّر رمز دخولي","Sign out":"تسجيل الخروج","Add":"إضافة","Everyone with an account":"كل أصحاب الحسابات","New person":"شخص جديد","Nobody added yet.":"لم تتم إضافة أحد بعد.","Rename show or edit scenes":"غيّر اسم العرض أو عدّل المشاهد","Edit show":"تعديل العرض","Show name":"اسم العرض","Scenes":"المشاهد","Type a scene name, then press Next. Add or move scenes with the controls.":"اكتب اسم المشهد ثم اضغط التالي. أضف المشاهد أو حرّكها باستخدام الأزرار.","Cancel":"إلغاء","Create":"إنشاء","Save":"حفظ","Roles":"الأدوار","A person can have more than one role in this show.":"يمكن للشخص أن يؤدي أكثر من دور في هذا العرض.","Save roles":"حفظ الأدوار","Remove from show":"إزالة من العرض","Tap again to remove":"اضغط مرة أخرى للإزالة","Character / part in this show":"الشخصية / الدور في هذا العرض","e.g. Layla":"مثال: ليلى","Assign the character or part this person plays in this show.":"حدد الشخصية أو الدور الذي يؤديه هذا الشخص في هذا العرض.","Director":"مخرج","Actor":"ممثل","Writer":"كاتب","Sound":"صوت","Lighting":"إضاءة","Member":"عضو","Admin":"مشرف","Close":"إغلاق","Everyone with an account is already in this show. An admin can create new accounts in the Team tab.":"كل أصحاب الحسابات موجودون بالفعل في هذا العرض. يمكن للمشرف إنشاء حسابات جديدة من صفحة الفريق.","Choose every role this person has in this show.":"اختر كل الأدوار التي يؤديها هذا الشخص في هذا العرض.","Choose a person and at least one role.":"اختر شخصًا ودورًا واحدًا على الأقل.","Choose at least one role.":"اختر دورًا واحدًا على الأقل.","Playing:":"يجسد شخصية:","Add cue":"أضف إشارة","Add note":"أضف ملاحظة","Notes for you":"ملاحظات لك","Private notes are only visible to you.":"الملاحظات الخاصة لا يراها سواك.","To myself":"لنفسي","To a person":"لشخص","Send to":"إرسال إلى","No one else is in this show yet.":"لا يوجد أحد غيرك في هذا العرض بعد.","Who can RSVP?":"من يمكنه تأكيد الحضور؟","Who should see this rehearsal?":"من يمكنه رؤية هذه البروفة؟","All show members":"كل أعضاء العرض","Clear selection":"إلغاء التحديد","Show dates are visible to all Manara users. Only selected show members can RSVP.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. يمكن لأعضاء العرض المحددين تأكيد الحضور.","Only selected people in this show can see this rehearsal. Directors are always included.":"الأشخاص المحددون فقط في هذا العرض يرون هذه البروفة. يُضاف المخرجون دائمًا.","Create admin":"إنشاء حساب المشرف","First-time setup":"الإعداد الأول","Create the admin account. You will use it to add everyone else.":"أنشئ حساب المشرف، وستستخدمه لإضافة بقية الفريق.","Your name":"اسمك","Code (at least 6 characters)":"رمز الدخول (6 أحرف على الأقل)","Writer":"كاتب","Arabic":"عربي","Switch language":"تغيير اللغة","☼ Light":"☼ فاتح","◐ Dark":"◐ داكن","Previous month":"الشهر السابق","Next month":"الشهر التالي","Previous scene":"المشهد السابق","Next scene":"المشهد التالي","Sound":"صوت","Lighting":"إضاءة","All":"الكل","Play":"تشغيل","Fade in":"زيادة تدريجية","Fade out":"خفض تدريجي","Volume up":"رفع الصوت","Volume down":"خفض الصوت","Stop":"إيقاف","Flicker":"وميض","Account created.":"تم إنشاء الحساب.","Full name":"الاسم الكامل","Also make this person an admin":"اجعل هذا الشخص مشرفًا أيضًا","Create account":"إنشاء الحساب","Details":"التفاصيل","Private":"خاص","To myself":"لنفسي","To a person":"لشخص","New note":"ملاحظة جديدة","New cue":"إشارة جديدة","Save cue":"حفظ الإشارة","Trigger (the line or action that cues it)":"المحفّز (الجملة أو الحركة التي تبدأ الإشارة)","Track or sound":"المسار أو الصوت","Note for the booth":"ملاحظة لمقصورة التحكم","Who is it for":"لمن هذه الملاحظة؟","Add rehearsal":"أضف بروفة","Edit date":"تعديل الموعد","Delete":"حذف","Going":"سأحضر","Not going":"لن أحضر","Days until":"الأيام المتبقية","Search":"بحث","Save date":"حفظ الموعد","Rehearsal / show":"بروفة / عرض","Writing":"كتابة","Copy details":"نسخ التفاصيل","Done":"تم"};
 function applyLanguage(){
   var ar=S.lang==="ar", root=document.documentElement;
   root.lang=ar?"ar":"en"; root.dir=ar?"rtl":"ltr";
@@ -69,7 +69,7 @@ function applyLanguage(){
   while((node=walker.nextNode())){if(node.parentElement&&node.parentElement.closest(".script-text"))continue;var raw=node.nodeValue,trim=raw.trim(),translated=AR_TEXT[trim];if(translated)node.nodeValue=raw.replace(trim,translated);}
   app.querySelectorAll("[aria-label],[title],[placeholder]").forEach(function(el){["aria-label","title","placeholder"].forEach(function(a){var v=el.getAttribute(a);if(v&&AR_TEXT[v])el.setAttribute(a,AR_TEXT[v]);});});
 }
-Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"مشاهد","people":"أشخاص","Tomorrow":"غدًا","No upcoming dates yet.":"لا توجد مواعيد قادمة.","Nothing from the director yet.":"لا توجد ملاحظات من المخرج بعد.","See all notes":"عرض كل الملاحظات","Open Live mode":"افتح وضع العرض","Overview":"نظرة عامة","Scenes":"المشاهد","Add a scene to start the script.":"أضف مشهدًا لبدء النص.","The director has not added this scene’s script yet.":"لم يضف المخرج نص هذا المشهد بعد.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Only you can see this note.":"لا يرى هذه الملاحظة سواك.","Private notes are only visible to you. Notes you send to a person are visible to them and to you.":"لا يطلع على ملاحظاتك الخاصة سواك. الملاحظات المرسلة لشخص يراها هو وأنت.","Notes from the director appear here.":"تظهر هنا ملاحظات المخرج.","No dates yet. A director can add rehearsals and production dates.":"لا توجد مواعيد بعد. يمكن للمخرج إضافة البروفات والعروض.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","No rehearsals or production dates yet. A director can add the first date.":"لا توجد بروفات أو عروض بعد. يمكن للمخرج إضافة أول موعد.","All production members":"كل أعضاء الإنتاج","Add a date":"أضف موعدًا","Name":"الاسم","Date":"التاريخ","Time":"الوقت","Production":"عرض","Edit date":"تعديل الموعد","Save date":"حفظ الموعد","Visible to all Manara users. RSVPs are for members of this production.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا الإنتاج.","Director":"مخرج","Edit production and scenes":"تعديل الإنتاج والمشاهد","Add rehearsal":"أضف بروفة","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","Select a department":"اختر القسم","Department":"القسم","Sound":"صوت","Lighting":"إضاءة","Delete cue":"حذف الإشارة","Duplicate":"نسخ","Save cue":"حفظ الإشارة","Scene script":"نص المشهد","Paste or type the script for this scene":"الصق أو اكتب نص هذا المشهد","Save script":"حفظ النص","Edit script":"تعديل النص","Add script":"أضف النص","Roles in":"الأدوار في","No one else is in this production yet.":"لا يوجد أحد غيرك في هذا الإنتاج بعد.","The code needs at least 6 characters.":"يجب أن يتكون الرمز من 6 أحرف على الأقل.","Enter a name and a username (letters and numbers).":"أدخل الاسم واسم المستخدم (حروف وأرقام).","The production needs a name.":"يجب إدخال اسم للإنتاج.","Name at least one scene.":"أدخل اسمًا لمشهد واحد على الأقل.","Keep at least one named scene.":"يجب الإبقاء على مشهد واحد مسمّى على الأقل.","Create the first one.":"أنشئ أول إنتاج.","You are not in any production yet. Ask your director or admin to add you.":"لست ضمن أي إنتاج بعد. اطلب من المخرج أو المشرف إضافتك.","This production has no scenes yet.":"لا توجد مشاهد في هذا الإنتاج بعد.","Someone":"شخص","Switch to light mode":"التبديل إلى الوضع الفاتح","Switch to dark mode":"التبديل إلى الوضع الداكن","Your profile":"ملفك الشخصي","Choose a production":"اختر إنتاجًا","Scenes":"المشاهد","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت"});
+Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"مشاهد","people":"أشخاص","Tomorrow":"غدًا","No upcoming dates yet.":"لا توجد مواعيد قادمة.","Nothing from the director yet.":"لا توجد ملاحظات من المخرج بعد.","See all notes":"عرض كل الملاحظات","Open Live mode":"افتح وضع العرض","Overview":"نظرة عامة","Scenes":"المشاهد","Add a scene to start the script.":"أضف مشهدًا لبدء النص.","The director has not added this scene’s script yet.":"لم يضف المخرج نص هذا المشهد بعد.","Select text, then choose a color. Only you can see your highlights.":"حدد النص ثم اختر لونًا. تمييزاتك تظهر لك وحدك.","Only you can see this note.":"لا يرى هذه الملاحظة سواك.","Private notes are only visible to you. Notes you send to a person are visible to them and to you.":"لا يطلع على ملاحظاتك الخاصة سواك. الملاحظات المرسلة لشخص يراها هو وأنت.","Notes from the director appear here.":"تظهر هنا ملاحظات المخرج.","No dates yet. A director can add rehearsals and show dates.":"لا توجد مواعيد بعد. يمكن للمخرج إضافة البروفات والعروض.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","No rehearsals or show dates yet. A director can add the first date.":"لا توجد بروفات أو عروض بعد. يمكن للمخرج إضافة أول موعد.","All show members":"كل أعضاء العرض","Add a date":"أضف موعدًا","Name":"الاسم","Date":"التاريخ","Time":"الوقت","Show":"العرض","Edit date":"تعديل الموعد","Save date":"حفظ الموعد","Visible to all Manara users. RSVPs are for members of this show.":"مواعيد العروض ظاهرة لجميع مستخدمي منارة. تأكيد الحضور متاح لأعضاء هذا العرض.","Director":"مخرج","Edit show and scenes":"تعديل العرض والمشاهد","Add rehearsal":"أضف بروفة","No one else is in this show yet.":"لا يوجد أحد غيرك في هذا العرض بعد.","Nothing scheduled for this day.":"لا توجد مواعيد لهذا اليوم.","Select a department":"اختر القسم","Department":"القسم","Sound":"صوت","Lighting":"إضاءة","Delete cue":"حذف الإشارة","Duplicate":"نسخ","Save cue":"حفظ الإشارة","Scene script":"نص المشهد","Paste or type the script for this scene":"الصق أو اكتب نص هذا المشهد","Save script":"حفظ النص","Edit script":"تعديل النص","Add script":"أضف النص","Roles in":"الأدوار في","No one else is in this show yet.":"لا يوجد أحد غيرك في هذا العرض بعد.","The code needs at least 6 characters.":"يجب أن يتكون الرمز من 6 أحرف على الأقل.","Enter a name and a username (letters and numbers).":"أدخل الاسم واسم المستخدم (حروف وأرقام).","The show needs a name.":"يجب إدخال اسم للعرض.","Name at least one scene.":"أدخل اسمًا لمشهد واحد على الأقل.","Keep at least one named scene.":"يجب الإبقاء على مشهد واحد مسمّى على الأقل.","Create the first one.":"أنشئ العرض الأول.","You are not in any show yet. Ask your director or admin to add you.":"لست ضمن أي عرض بعد. اطلب من المخرج أو المشرف إضافتك.","This show has no scenes yet.":"لا توجد مشاهد في هذا العرض بعد.","Someone":"شخص","Switch to light mode":"التبديل إلى الوضع الفاتح","Switch to dark mode":"التبديل إلى الوضع الداكن","Your profile":"ملفك الشخصي","Choose a show":"اختر عرضًا","Scenes":"المشاهد","Sun":"الأحد","Mon":"الاثنين","Tue":"الثلاثاء","Wed":"الأربعاء","Thu":"الخميس","Fri":"الجمعة","Sat":"السبت"});
 Object.assign(AR_TEXT,{"Going":"الحاضرون","Can’t make it":"المعتذرون","No one yet":"لا أحد حتى الآن"});
 AR_TEXT["Account codes are managed by admins. Contact an admin if you need help signing in."]="يتولى المشرفون إدارة رموز الدخول. تواصل مع أحدهم إذا احتجت إلى مساعدة في تسجيل الدخول.";
 AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
@@ -155,14 +155,14 @@ function renderShell(){
   var order=["home","calendar","production","team"], prior=order.indexOf(S.lastTab), now=order.indexOf(S.tab);
   var animate=!!(S.lastTab&&S.lastTab!==S.tab), from=prior<now?"18px":"-18px";
   h += '<header class="top">'+logo(40)
-    +'<div class="top-production"><small>Current production</small><b>'+esc(p?p.name:"No production selected")+'</b></div>'
+    +'<div class="top-production"><small>Current show</small><b>'+esc(p?p.name:"No show selected")+'</b></div>'
     +'<button class="theme-toggle" data-act="theme-toggle" aria-label="Switch to '+(effectiveTheme()==="dark"?'light':'dark')+' mode">'+(effectiveTheme()==="dark"?'☼ Light':'◐ Dark')+'</button>'
     +'<button class="language-toggle" data-act="language-toggle" aria-label="Switch language">'+(S.lang==="ar"?'English':'عربي')+'</button>'
     +'<button class="avatar" data-act="tab" data-t="team" aria-label="Your profile">'+esc(initials(S.user.name))+'</button></header>';
-  h+='<div class="production-selector-bar"><div class="production-sidebar-title">Productions</div><nav class="production-list" aria-label="Choose a production">';
+  h+='<div class="production-selector-bar"><div class="production-sidebar-title">Shows</div><nav class="production-list" aria-label="Choose a show">';
   if(S.prods.length) S.prods.forEach(function(x){ h+='<button class="production-choice" data-act="switch-prod" data-id="'+esc(x.id)+'" aria-current="'+(x.id===S.pid)+'"><span class="production-indicator" aria-hidden="true"></span><span class="production-choice-name">'+esc(x.name)+'</span></button>'; });
-  else h+='<p class="muted small sidebar-empty">No productions yet.</p>';
-  h+='</nav>'+(isAdmin()?'<button class="sidebar-new-production" data-act="new-prod">'+ic("plus",18)+' New production</button>':'')+'</div><div class="workspace-layout"><div class="workspace-main">';
+  else h+='<p class="muted small sidebar-empty">No shows yet.</p>';
+  h+='</nav>'+(isAdmin()?'<button class="sidebar-new-production" data-act="new-prod">'+ic("plus",18)+' New show</button>':'')+'</div><div class="workspace-layout"><div class="workspace-main">';
   h += '<main class="page'+(animate?' page-slide':'')+'" style="--slide-from:'+from+'" data-active-tab="'+S.tab+'">';
   if(S.tab==="calendar") h += renderCalendar(p);
   else if(!p) h += renderNoProd();
@@ -173,16 +173,16 @@ function renderShell(){
   if(p && S.tab==="production" && S.prodView==="cues" && myDepts().length) h += '<button class="fab" data-act="add-cue">'+ic("plus",20)+' Add cue</button>';
   if(p && S.tab==="production" && S.prodView==="notes") h += '<button class="fab" data-act="add-note">'+ic("plus",20)+' Add note</button>';
   h += '<nav class="tabs" aria-label="Main">'
-    + tab("home","Home","home")+tab("calendar","Calendar","cal")+tab("production","Production","script")+tab("team","Team","team")+'</nav>';
+    + tab("home","Home","home")+tab("calendar","Calendar","cal")+tab("production","Show","theatre")+tab("team","Team","team")+'</nav>';
   h+='</div></div>';
   S.lastTab=null;
   return h;
 }
-function tab(id,label,icon){ return '<button class="tab" data-act="tab" data-t="'+id+'" aria-current="'+(S.tab===id)+'">'+ic(icon,22)+'<span>'+label+'</span></button>'; }
+function tab(id,label,icon){ var mark=icon==="theatre"?'<span class="tab-emoji" aria-hidden="true">🎭</span>':ic(icon,22); return '<button class="tab" data-act="tab" data-t="'+id+'" aria-current="'+(S.tab===id)+'">'+mark+'<span>'+label+'</span></button>'; }
 function renderNoProd(){
   return '<h1 class="h1">Welcome, '+esc(S.user.name.split(" ")[0])+'</h1>'
-   +(isAdmin()?'<div class="empty">No productions yet. Create the first one.</div><button class="btn primary block" data-act="new-prod">'+ic("plus",20)+' New production</button>'
-              :'<div class="empty">You are not in any production yet. Ask your director or admin to add you.</div>');
+   +(isAdmin()?'<div class="empty">No shows yet. Create the first one.</div><button class="btn primary block" data-act="new-prod">'+ic("plus",20)+' New show</button>'
+              :'<div class="empty">You are not in any show yet. Ask your director or admin to add you.</div>');
 }
 function daysUntil(ms){ var a=new Date(), b=new Date(ms); a.setHours(0,0,0,0); b.setHours(0,0,0,0); return Math.ceil((b-a)/86400000); }
 function relativeDate(ms){var n=daysUntil(ms);if(S.lang==="ar")return n<0?"مضى":n===0?"اليوم":n===1?"غدًا":"بعد "+n+" يومًا";return n<0?"Past":n===0?"Today":n===1?"Tomorrow":"In "+n+" days";}
@@ -208,12 +208,12 @@ function renderHome(p){
     +'<p class="muted small">'+productionCountText(p)+'</p></div>';
   h+='<div class="card home-coming"><div class="row"><h3 class="grow">Coming up</h3><button class="small muted home-calendar-link" data-act="tab" data-t="calendar">Go to calendar <span aria-hidden="true">→</span></button></div>';
   if(next){
-    var scope=next.pid&&next.pid!==S.pid?(next.productionName||"Another production")+' · ':'';
-    h+='<div class="home-coming-feature"><div class="row"><span class="event-kind '+(next.kind==="show"?'show':'rehearsal')+'"><i></i>'+(next.kind==="show"?'Production / show':'Rehearsal')+'</span><span class="home-coming-until">'+esc(relativeDate(next.startsAt))+'</span></div>'
+    var scope=next.pid&&next.pid!==S.pid?(next.productionName||"Another show")+' · ':'';
+    h+='<div class="home-coming-feature"><div class="row"><span class="event-kind '+(next.kind==="show"?'show':'rehearsal')+'"><i></i>'+(next.kind==="show"?'Show':'Rehearsal')+'</span><span class="home-coming-until">'+esc(relativeDate(next.startsAt))+'</span></div>'
       +'<b class="home-coming-title">'+esc(next.title)+'</b><p class="muted small">'+esc(scope+dateLabel(next.startsAt))+'</p></div>';
     upcoming.slice(1,3).forEach(function(e){
-      var otherScope=e.pid&&e.pid!==S.pid?(e.productionName||"Another production")+' · ':'';
-      h+='<div class="home-coming-row"><span class="home-coming-date"><b>'+esc(new Date(e.startsAt).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{day:"numeric"}))+'</b><small>'+esc(new Date(e.startsAt).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{month:"short"}))+'</small></span><span class="home-coming-copy"><b>'+esc(e.title)+'</b><small>'+esc(otherScope+dateLabel(e.startsAt))+'</small></span><span class="event-kind '+(e.kind==="show"?'show':'rehearsal')+'"><i></i>'+(e.kind==="show"?'Production / show':'Rehearsal')+'</span></div>';
+      var otherScope=e.pid&&e.pid!==S.pid?(e.productionName||"Another show")+' · ':'';
+      h+='<div class="home-coming-row"><span class="home-coming-date"><b>'+esc(new Date(e.startsAt).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{day:"numeric"}))+'</b><small>'+esc(new Date(e.startsAt).toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{month:"short"}))+'</small></span><span class="home-coming-copy"><b>'+esc(e.title)+'</b><small>'+esc(otherScope+dateLabel(e.startsAt))+'</small></span><span class="event-kind '+(e.kind==="show"?'show':'rehearsal')+'"><i></i>'+(e.kind==="show"?'Show':'Rehearsal')+'</span></div>';
     });
   }
   else h+='<p class="muted">No upcoming dates yet.</p>';
@@ -234,7 +234,7 @@ function sceneChips(p){
 }
 function renderProduction(p){
   var views=[["overview","Overview"],["script","Script"],["cues","Cues"],["notes","Notes"]];
-  var h='<h1 class="h1">'+esc(p.name)+'</h1><div class="seg workspace-tabs" role="tablist" aria-label="Production pages">';
+  var h='<h1 class="h1">'+esc(p.name)+'</h1><div class="seg workspace-tabs" role="tablist" aria-label="Show pages">';
   views.forEach(function(v){ h+='<button role="tab" data-act="prod-view" data-v="'+v[0]+'" aria-selected="'+(S.prodView===v[0])+'">'+v[1]+'</button>'; });
   h+='</div>';
   var order=["overview","script","cues","notes"], changed=!!(S.lastProdView&&S.lastProdView!==S.prodView);
@@ -251,8 +251,8 @@ function renderProductionOverview(p){
   var character=(p.characters||{})[S.user.uid];
   var h='<div class="card"><div class="row"><h3 class="grow">Your part</h3><span class="badge">'+esc(roleLabel(myRoles())||(isAdmin()?"Admin":"Member"))+'</span></div>'+(character?'<p class="character-part"><b>Playing:</b> '+esc(character)+'</p>':'')+'<p class="muted small">'+productionCountText(p)+'</p></div>';
   h+='<div class="card"><h3>Next date</h3>'+(upcoming?'<b>'+esc(upcoming.title)+'</b><p class="muted small">'+esc(dateLabel(upcoming.startsAt))+' · '+relativeDate(upcoming.startsAt)+'</p>':'<p class="muted">Nothing scheduled yet.</p>')+'<button class="btn" data-act="tab" data-t="calendar">Open calendar</button></div>';
-  h+='<div class="card"><h3>Production materials</h3><p class="muted">Read the script, your role cues, and rehearsal notes in one place.</p><div class="sheetrow"><button class="btn" data-act="prod-view" data-v="script">Script</button><button class="btn" data-act="prod-view" data-v="cues">Cues</button></div><button class="btn" data-act="prod-view" data-v="notes">'+mine+' note'+(mine===1?'':'s')+' for you</button></div>';
-  if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Edit production and scenes</button>';
+  h+='<div class="card"><h3>Show materials</h3><p class="muted">Read the script, your role cues, and rehearsal notes in one place.</p><div class="sheetrow"><button class="btn" data-act="prod-view" data-v="script">Script</button><button class="btn" data-act="prod-view" data-v="cues">Cues</button></div><button class="btn" data-act="prod-view" data-v="notes">'+mine+' note'+(mine===1?'':'s')+' for you</button></div>';
+  if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Edit show and scenes</button>';
   return h;
 }
 function renderScript(p){
@@ -282,23 +282,23 @@ function renderCalendar(p){
   if(!S.calSelected) S.calSelected=today;
   var m=S.calMonth, first=new Date(m.getFullYear(),m.getMonth(),1), weekStart=S.lang==="ar"?6:0, offset=(first.getDay()-weekStart+7)%7, total=new Date(m.getFullYear(),m.getMonth()+1,0).getDate(), cells=Math.ceil((offset+total)/7)*7;
   var all=allVisibleEvents().sort(function(a,b){return a.startsAt-b.startsAt;}), h='<div class="row"><h1 class="h1 grow">Calendar</h1>'+(p&&isDirector()?'<button class="btn primary" data-act="new-event">'+ic("plus",18)+' Add date</button>':'')+'</div>';
-  h+='<div class="cal-legend"><span><i class="rehearsal"></i> Rehearsal</span><span><i class="show"></i> Production / show</span></div>';
+  h+='<div class="cal-legend"><span><i class="rehearsal"></i> Rehearsal</span><span><i class="show"></i> Show</span></div>';
   h+='<div class="seg cal-mode" role="group" aria-label="Calendar view"><button data-act="cal-mode" data-v="month" aria-pressed="'+(S.calMode==="month")+'">Month</button><button data-act="cal-mode" data-v="agenda" aria-pressed="'+(S.calMode==="agenda")+'">Agenda</button></div>';
   if(S.calMode==="month"){
     h+='<section class="card month-card" aria-label="'+esc(calendarTitle(m))+'"><div class="month-head"><button class="month-arrow" data-act="cal-nav" data-d="-1" aria-label="Previous month">‹</button><h2>'+esc(calendarTitle(m))+'</h2><button class="month-arrow" data-act="cal-nav" data-d="1" aria-label="Next month">›</button></div>';
     h+='<div class="month-weekdays" aria-hidden="true">'+(S.lang==="ar"?["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"]:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]).map(function(x){return '<span>'+x+'</span>';}).join('')+'</div><div class="month-grid">';
     for(var i=0;i<cells;i++){
-      var day=i-offset+1, inMonth=day>0&&day<=total, cellDate=new Date(m.getFullYear(),m.getMonth(),day), key=dayKey(cellDate.getTime()), dayEvents=inMonth?eventsOn(key):[], labels=dayEvents.map(function(e){return (e.kind==="show"?"Production/show":"Rehearsal")+": "+e.title;}).join(", ");
+      var day=i-offset+1, inMonth=day>0&&day<=total, cellDate=new Date(m.getFullYear(),m.getMonth(),day), key=dayKey(cellDate.getTime()), dayEvents=inMonth?eventsOn(key):[], labels=dayEvents.map(function(e){return (e.kind==="show"?"Show":"Rehearsal")+": "+e.title;}).join(", ");
       h+='<button class="cal-day'+(inMonth?'':' outside')+(key===S.calSelected?' selected':'')+(key===today?' today':'')+'" data-act="cal-day" data-date="'+key+'"'+(inMonth?'':' disabled')+' aria-label="'+esc(inMonth?cellDate.toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{weekday:"long",month:"long",day:"numeric"})+(labels?"; "+labels:"; no dates"):"")+'" aria-pressed="'+(key===S.calSelected)+'">'
         +'<span class="cal-num">'+(inMonth?day:'')+'</span>'+(dayEvents.length?'<span class="cal-dots">'+dayEvents.slice(0,3).map(function(e){return '<i class="'+(e.kind==="show"?'show':'rehearsal')+'"></i>';}).join('')+(dayEvents.length>3?'<b>+'+(dayEvents.length-3)+'</b>':'')+'</span>':'<span class="cal-dots blank"></span>')+'</button>';
     }
     h+='</div><div class="month-foot"><span>'+esc(calendarTitle(m))+'</span><button class="small muted" data-act="cal-today">Today</button></div></section>';
     var selected=dateFromKey(S.calSelected), selectedEvents=eventsOn(S.calSelected);
     h+='<div class="row day-heading"><h2 class="grow">'+esc(selected.toLocaleDateString(S.lang==="ar"?"ar-EG":undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2><span class="muted small">'+selectedEvents.length+' date'+(selectedEvents.length===1?'':'s')+'</span></div>';
-    if(!selectedEvents.length) h+='<div class="empty">'+(all.length?'Nothing scheduled for this day.':'No dates yet. A director can add rehearsals and production dates.')+'</div>';
+    if(!selectedEvents.length) h+='<div class="empty">'+(all.length?'Nothing scheduled for this day.':'No dates yet. A director can add rehearsals and show dates.')+'</div>';
     selectedEvents.forEach(function(e){h+=renderCalendarEvent(e);});
   }else{
-    if(!all.length) h+='<div class="empty">No rehearsals or production dates yet. A director can add the first date.</div>';
+    if(!all.length) h+='<div class="empty">No rehearsals or show dates yet. A director can add the first date.</div>';
     all.forEach(function(e){h+=renderCalendarEvent(e);});
   }
   return h;
@@ -308,7 +308,7 @@ function renderCalendarEvent(e){
   var mine=rs.filter(function(r){return r.uid===S.user.uid;})[0], invite=(e.memberIds||[]).indexOf(S.user.uid)>-1, days=daysUntil(e.startsAt), show=e.kind==="show";
   var eventProd=S.prods.filter(function(x){return x.id===e.pid;})[0], canManage=isDirector()&&(!e.pid||e.pid===S.pid), canRespond=invite&&!!eventProd, saving=!!S.responseSaving[e.id];
   var context=e.productionName||(eventProd&&eventProd.name), otherProd=e.pid&&e.pid!==S.pid;
-  var h='<article class="card event-card '+(show?'event-show':'event-rehearsal')+'"><div class="row"><span class="event-kind '+(show?'show':'rehearsal')+'"><i></i>'+(show?'Production / show':'Rehearsal')+'</span><span class="grow"></span>'+(canManage?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
+  var h='<article class="card event-card '+(show?'event-show':'event-rehearsal')+'"><div class="row"><span class="event-kind '+(show?'show':'rehearsal')+'"><i></i>'+(show?'Show':'Rehearsal')+'</span><span class="grow"></span>'+(canManage?'<button class="small muted" data-act="edit-event" data-id="'+e.id+'">Edit</button><button class="small muted" data-act="del-event" data-id="'+e.id+'">'+(S.confirmEventDelete===e.id?'Tap again to delete':'Delete')+'</button>':'')+'</div>';
   h+='<h3>'+esc(e.title)+'</h3><p class="muted small">'+esc(dateLabel(e.startsAt))+(otherProd&&context?' · '+esc(context):'')+'</p><b class="countdown">'+(S.lang==="ar"?(days<0?'مضى':days===0?'اليوم':days===1?'غدًا':'بعد '+days+' يومًا'):(days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days away'))+'</b>';
   if(canRespond||canManage) h+='<p class="muted small">'+(S.lang==="ar"?yes+' حاضر · '+no+' معتذر':yes+' going · '+no+' can’t make it')+'</p>';
   if(canManage){
@@ -316,15 +316,15 @@ function renderCalendarEvent(e){
     h+='<div class="rsvp-roster" aria-live="polite"><div><b>Going</b><p>'+esc(goingNames.length?goingNames.join(', '):'No one yet')+'</p></div><div><b>Can’t make it</b><p>'+esc(noNames.length?noNames.join(', '):'No one yet')+'</p></div></div>';
   }
   if(canRespond) h+='<div class="rsvp"><button class="btn'+(mine&&mine.response==="going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="going" aria-pressed="'+(mine&&mine.response==="going"?"true":"false")+'"'+(saving?' disabled':'')+'>I’m going</button><button class="btn'+(mine&&mine.response==="not-going"?' primary':'')+'" data-act="rsvp" data-id="'+e.id+'" data-r="not-going" aria-pressed="'+(mine&&mine.response==="not-going"?"true":"false")+'"'+(saving?' disabled':'')+'>Can’t make it</button></div>';
-  else if(show) h+='<p class="hint">Visible to all Manara users. RSVPs are for members of this production.</p>';
-  else h+='<p class="hint">This rehearsal is for selected members of this production.</p>';
+  else if(show) h+='<p class="hint">Visible to all Manara users. RSVPs are for members of this show.</p>';
+  else h+='<p class="hint">This rehearsal is for selected members of this show.</p>';
   return h+'</article>';
 }
 
 /* --- role-specific cues --- */
 function renderCues(p){
   var h='', s=scene(), depts=myDepts();
-  if(!depts.length) return '<div class="empty">Technical cues are for Sound and Lighting. Your script and rehearsal notes are in the other production pages.</div>';
+  if(!depts.length) return '<div class="empty">Technical cues are for Sound and Lighting. Your script and rehearsal notes are in the other show pages.</div>';
   var dep=isDirector()?S.dept:(depts.length===1?depts[0]:"all");
   if(isDirector()||depts.length>1) h+='<div class="seg" role="group" aria-label="Department">'+[["all","All"],["sound","Sound"],["lighting","Lighting"]].map(function(x){ return '<button data-act="dept" data-d="'+x[0]+'" aria-pressed="'+(dep===x[0])+'">'+x[1]+'</button>'; }).join('')+'</div>';
   var list=S.cues.filter(function(c){ return c.sceneId===(s&&s.id) && (dep==="all"||c.dept===dep); }).sort(function(a,b){ return ((a.dept==='sound'?0:1)-(b.dept==='sound'?0:1)) || (a.order||0)-(b.order||0); });
@@ -375,14 +375,14 @@ function renderTeam(p){
       var part=(p.characters||{})[id];
       h+='<button class="li" data-act="member" data-id="'+id+'"'+(isDirector()?'':' disabled')+'><span class="grow"><b>'+esc(nameOf(id))+'</b><br><small>@'+esc((userById(id)||{}).username||"")+(part?'<br><span class="character-part">Playing: '+esc(part)+'</span>':'')+'</small></span><span class="badge">'+esc(roleLabel(role))+'</span></button>';
     });
-    if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Rename production or edit scenes</button>';
+    if(isDirector()) h+='<button class="btn block" data-act="edit-prod">Rename show or edit scenes</button>';
   }
   if(isAdmin()){
     h+='<div class="row" style="margin-top:8px"><h3 class="grow" style="font-family:var(--display);font-size:24px">Everyone with an account</h3><button class="btn" data-act="new-user">'+ic("plus",18)+' New person</button></div>';
     S.users.slice().sort(function(a,b){ return a.name.localeCompare(b.name); }).forEach(function(u){
       h+='<div class="li"><span class="grow"><b>'+esc(u.name)+'</b><br><small>@'+esc(u.username)+'</small></span>'+(u.isAdmin?'<span class="badge">Admin</span>':'')+'</div>';
     });
-    h+='<button class="btn block" data-act="new-prod">'+ic("plus",18)+' New production</button>';
+    h+='<button class="btn block" data-act="new-prod">'+ic("plus",18)+' New show</button>';
   }
   return h;
 }
@@ -446,32 +446,32 @@ function renderSheet(){
       +(sh.isNew?'':'<div class="sheetrow"><button class="btn" data-act="dup-cue">Duplicate</button><button class="btn danger'+(sh.confirm?' armed':'')+'" data-act="del-cue">'+(sh.confirm?'Tap again to delete':'Delete cue')+'</button></div>');
   }
   else if(sh.type==="prod-menu"){
-    h+='<h2>Productions</h2><div class="chips" style="flex-direction:column;overflow:visible;gap:8px">'
+    h+='<h2>Shows</h2><div class="chips" style="flex-direction:column;overflow:visible;gap:8px">'
       +S.prods.map(function(x){ return '<button class="li" data-act="switch-prod" data-id="'+x.id+'"'+(x.id===S.pid?' style="border-color:var(--accent)"':'')+'><b>'+esc(x.name)+'</b><small>'+x.scenes.length+' scenes</small></button>'; }).join('')+'</div>'
-      +(S.prods.length?'':'<p class="muted">No productions yet.</p>')
-      +(isAdmin()?'<button class="btn primary block" data-act="new-prod">'+ic("plus",18)+' New production</button>':'')+'<button class="btn block" data-act="close">Close</button>';
+      +(S.prods.length?'':'<p class="muted">No shows yet.</p>')
+      +(isAdmin()?'<button class="btn primary block" data-act="new-prod">'+ic("plus",18)+' New show</button>':'')+'<button class="btn block" data-act="close">Close</button>';
   }
   else if(sh.type==="new-prod"||sh.type==="edit-prod"){
     var isNew=sh.type==="new-prod";
-    h+='<h2>'+(isNew?'New production':'Edit production')+'</h2>'+field("pname","Production name",sh.name,"e.g. Easter drama")
+    h+='<h2>'+(isNew?'New show':'Edit show')+'</h2>'+field("pname","Show name",sh.name,"e.g. Easter drama")
       +'<div class="field"><label>Scenes</label><p class="hint">Type a scene name, then press Next. Add or move scenes with the controls.</p>'+renderSceneRows(sh.scenes)+'</div>'
       +(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')
       +rowBtns("Cancel",isNew?"create-prod":"save-prod",isNew?"Create":"Save");
   }
   else if(sh.type==="member"){
     var u=userById(sh.uid)||{name:"Person"};
-    h+='<h2>'+esc(u.name)+'</h2><div class="field"><label>Roles in '+esc(p.name)+'</label><p class="hint">A person can have more than one role in this production.</p><div class="roles">'
+    h+='<h2>'+esc(u.name)+'</h2><div class="field"><label>Roles in '+esc(p.name)+'</label><p class="hint">A person can have more than one role in this show.</p><div class="roles">'
       +ROLES.map(function(r){ return '<button class="role" data-act="member-role" data-r="'+r.id+'" aria-pressed="'+(sh.roles.indexOf(r.id)>-1)+'">'+r.label+'</button>'; }).join('')+'</div></div>'
-      +field("character","Character / part in this production",sh.character,"e.g. Layla")+'<p class="hint">Assign the character or part this person plays in this production.</p>'
-      +rowBtns("Close","save-member","Save roles")+'<button class="btn danger block'+(sh.confirm?' armed':'')+'" data-act="remove-member">'+(sh.confirm?'Tap again to remove':'Remove from production')+'</button>';
+      +field("character","Character / part in this show",sh.character,"e.g. Layla")+'<p class="hint">Assign the character or part this person plays in this show.</p>'
+      +rowBtns("Close","save-member","Save roles")+'<button class="btn danger block'+(sh.confirm?' armed':'')+'" data-act="remove-member">'+(sh.confirm?'Tap again to remove':'Remove from show')+'</button>';
   }
   else if(sh.type==="add-member"){
     var avail=S.users.filter(function(x){ return !(p.members||{})[x.uid]; });
     h+='<h2>Add to '+esc(p.name)+'</h2>';
-    if(!avail.length) h+='<p class="muted">Everyone with an account is already in this production. An admin can create new accounts in the Team tab.</p>';
+    if(!avail.length) h+='<p class="muted">Everyone with an account is already in this show. An admin can create new accounts in the Team tab.</p>';
     else{
       h+='<div class="chips" style="flex-direction:column;overflow:visible;gap:8px">'+avail.map(function(x){ return '<button class="li" data-act="pick-person" data-id="'+x.uid+'"'+(sh.uid===x.uid?' style="border-color:var(--accent)"':'')+'><span><b>'+esc(x.name)+'</b><br><small>@'+esc(x.username)+'</small></span>'+(sh.uid===x.uid?ic("check",18):'')+'</button>'; }).join('')+'</div>'
-        +'<div class="field"><label>Roles</label><p class="hint">Choose every role this person has in this production.</p><div class="roles">'+ROLES.map(function(r){ return '<button class="role" data-act="pick-role" data-r="'+r.id+'" aria-pressed="'+(sh.role.indexOf(r.id)>-1)+'">'+r.label+'</button>'; }).join('')+'</div></div>';
+        +'<div class="field"><label>Roles</label><p class="hint">Choose every role this person has in this show.</p><div class="roles">'+ROLES.map(function(r){ return '<button class="role" data-act="pick-role" data-r="'+r.id+'" aria-pressed="'+(sh.role.indexOf(r.id)>-1)+'">'+r.label+'</button>'; }).join('')+'</div></div>';
     }
     if(sh.err) h+='<p class="err">'+esc(sh.err)+'</p>';
     h+='<div class="sheetrow stick"><button class="btn" data-act="close">Cancel</button>'+(avail.length?'<button class="btn primary" data-act="do-add-member"'+(sh.uid?'':' disabled')+'>Add</button>':'')+'</div>';
@@ -496,7 +496,7 @@ function renderSheet(){
       h+='<div class="seg" role="group" aria-label="Who is it for"><button data-act="note-kind" data-k="private" aria-pressed="'+(d2.kind==="private")+'">To myself</button><button data-act="note-kind" data-k="direct" aria-pressed="'+(d2.kind==="direct")+'">To a person</button></div>';
       if(d2.kind==="direct"){
         var ppl=Object.keys(p.members||{}).filter(function(id){ return id!==S.user.uid; });
-        h+='<div class="field"><label>Send to</label><div class="chips" style="flex-direction:column;overflow:visible;gap:8px">'+(ppl.length?ppl.map(function(id){ return '<button class="li" data-act="note-to" data-id="'+id+'"'+(d2.to===id?' style="border-color:var(--accent)"':'')+'><span><b>'+esc(nameOf(id))+'</b> <small>'+esc(roleLabel(p.members[id]))+'</small></span>'+(d2.to===id?ic("check",18):'')+'</button>'; }).join(''):'<p class="muted">No one else is in this production yet.</p>')+'</div></div>';
+        h+='<div class="field"><label>Send to</label><div class="chips" style="flex-direction:column;overflow:visible;gap:8px">'+(ppl.length?ppl.map(function(id){ return '<button class="li" data-act="note-to" data-id="'+id+'"'+(d2.to===id?' style="border-color:var(--accent)"':'')+'><span><b>'+esc(nameOf(id))+'</b> <small>'+esc(roleLabel(p.members[id]))+'</small></span>'+(d2.to===id?ic("check",18):'')+'</button>'; }).join(''):'<p class="muted">No one else is in this show yet.</p>')+'</div></div>';
       }
     }else h+='<p class="hint">Only you can see this note.</p>';
     h+=area("text","Note",d2.text,"e.g. Take the second line slower",4)+(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')+rowBtns("Cancel","save-note","Save note");
@@ -509,12 +509,12 @@ function renderSheet(){
   }
   else if(sh.type==="event"){
     h+='<h2>'+(sh.id?'Edit date':'Add a date')+'</h2><p class="hint">For '+esc(p.name)+'</p>'
-      +'<div class="seg"><button data-act="event-kind" data-k="rehearsal" aria-pressed="'+(sh.kind==="rehearsal")+'">Rehearsal</button><button data-act="event-kind" data-k="show" aria-pressed="'+(sh.kind==="show")+'">Production</button></div>'
+      +'<div class="seg"><button data-act="event-kind" data-k="rehearsal" aria-pressed="'+(sh.kind==="rehearsal")+'">Rehearsal</button><button data-act="event-kind" data-k="show" aria-pressed="'+(sh.kind==="show")+'">Show</button></div>'
       +field("eventTitle","Name",sh.title,"e.g. Full cast rehearsal")
       +field("eventDate","Date",sh.date,"",{type:"date"})+field("eventTime","Time",sh.time,"",{type:"time"})
-      +'<div class="field"><label>'+(sh.kind==="show"?'Who can RSVP?':'Who should see this rehearsal?')+'</label><div class="sheetrow"><button class="btn" data-act="event-all">All production members</button><button class="btn" data-act="event-none">Clear selection</button></div><div class="chips attendee-list">'
+      +'<div class="field"><label>'+(sh.kind==="show"?'Who can RSVP?':'Who should see this rehearsal?')+'</label><div class="sheetrow"><button class="btn" data-act="event-all">All show members</button><button class="btn" data-act="event-none">Clear selection</button></div><div class="chips attendee-list">'
       +Object.keys(p.members||{}).filter(function(id){return roleList(p.members[id]).indexOf("director")===-1;}).map(function(id){ return '<button class="chip" data-act="event-attendee" data-id="'+id+'" aria-pressed="'+(sh.memberIds.indexOf(id)>-1)+'">'+esc(nameOf(id))+'</button>'; }).join('')
-      +'</div><p class="hint">'+(sh.kind==="show"?'Show dates are visible to all Manara users. Only selected production members can RSVP.':'Only selected people in this production can see this rehearsal. Directors are always included.')+'</p></div>'
+      +'</div><p class="hint">'+(sh.kind==="show"?'Show dates are visible to all Manara users. Only selected show members can RSVP.':'Only selected people in this show can see this rehearsal. Directors are always included.')+'</p></div>'
       +(sh.err?'<p class="err">'+esc(sh.err)+'</p>':'')+rowBtns("Cancel","save-event","Save date");
   }
   h+='</div></div>';
@@ -566,7 +566,7 @@ function startWatch(){
   var syncedProds="";
   unsub.users=DB.watchUsers(function(l){ S.users=l; softRender(); });
   unsub.publicShows=DB.watchPublicShows(function(l){ S.publicShows=l; watchEventResponses(S.pid,allVisibleEvents()); softRender(); });
-  unsub.prods=DB.watchProductions(S.user,function(l){
+  unsub.prods=DB.watchShows(S.user,function(l){
     S.prods=l;
     var prodSignature=l.map(function(x){return x.id+":"+x.name;}).sort().join("|");
     if(isAdmin()&&prodSignature&&prodSignature!==syncedProds){
@@ -601,7 +601,7 @@ function onUser(u){
 }
 function saveProd(p){
   p.memberIds=Object.keys(p.members||{});
-  return absorb(DB.saveProduction(p),"Could not save");
+  return absorb(DB.saveShow(p),"Could not save");
 }
 function parseScenes(rows){ return rows.map(function(x){ return {id:x.id||uid(),name:String(x.name||"").trim()}; }).filter(function(x){ return !!x.name; }); }
 
@@ -644,7 +644,7 @@ function handle(act, el){
 
     case "new-prod": openSheet({type:"new-prod",name:"",scenes:[{id:uid(),name:""}],err:""}); break;
     case "create-prod":
-      var nme=(S.sheet.name||"").trim(); if(!nme){ S.sheet.err="Give the production a name."; render(); break; }
+      var nme=(S.sheet.name||"").trim(); if(!nme){ S.sheet.err="Give the show a name."; render(); break; }
       var newScenes=parseScenes(S.sheet.scenes); if(!newScenes.length){ S.sheet.err="Name at least one scene."; render(); break; }
       var np={id:uid(),name:nme,scenes:newScenes,members:{},createdBy:S.user.uid,createdAt:Date.now()};
       np.members[S.user.uid]=["director"];
@@ -652,7 +652,7 @@ function handle(act, el){
       break;
     case "edit-prod": openSheet({type:"edit-prod",name:p.name,scenes:p.scenes.map(function(x){ return {id:x.id,name:x.name}; }),err:""}); break;
     case "save-prod":
-      var nn=(S.sheet.name||"").trim(); if(!nn){ S.sheet.err="The production needs a name."; render(); break; }
+      var nn=(S.sheet.name||"").trim(); if(!nn){ S.sheet.err="The show needs a name."; render(); break; }
       var scs=parseScenes(S.sheet.scenes); if(!scs.length){ S.sheet.err="Keep at least one named scene."; render(); break; }
       var kept={}; scs.forEach(function(x){kept[x.id]=true;}); var removed=p.scenes.filter(function(x){return !kept[x.id];});
       var orphan=S.cues.filter(function(c){ return removed.some(function(r){ return r.id===c.sceneId; }); });
@@ -790,7 +790,7 @@ function handle(act, el){
     case "rsvp":
       var reid=el.getAttribute("data-id"), rv=el.getAttribute("data-r");
       var replyEvent=allVisibleEvents().filter(function(x){return x.id===reid;})[0], replyPid=replyEvent&&replyEvent.pid||p.id;
-      if(!replyEvent||!replyEvent.memberIds||replyEvent.memberIds.indexOf(S.user.uid)===-1){toast("Only invited production members can reply to this date.");break;}
+      if(!replyEvent||!replyEvent.memberIds||replyEvent.memberIds.indexOf(S.user.uid)===-1){toast("Only invited show members can reply to this date.");break;}
       if(S.responseSaving[reid]) break;
       var priorResponses=(S.responses[reid]||[]).slice(), optimistic={uid:S.user.uid,response:rv,updatedAt:Date.now()}, pendingResponse={uid:S.user.uid,optimistic:optimistic,confirmed:priorResponses};
       S.responseSaving[reid]=pendingResponse;
