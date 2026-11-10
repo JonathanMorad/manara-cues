@@ -317,3 +317,11 @@ body.sheet-open{overflow:hidden;overscroll-behavior:none}
   .sidebar-new-production{padding:0 8px;min-height:40px;font-size:11px}
   .workspace-main .tabs{left:12px;right:12px;transform:none;width:auto}
 }
+
+/* Keep sign-in usable while the phone keyboard is open. */
+@media(max-width:600px){
+  .auth{min-height:100vh;min-height:100svh;min-height:100dvh}
+  .auth:focus-within{justify-content:flex-start;padding-top:max(12px,env(safe-area-inset-top,0px))}
+  .auth:focus-within .logo{width:min(22vw,88px)}
+  .auth:focus-within .lockup b{font-size:clamp(38px,10vw,48px)}
+}
