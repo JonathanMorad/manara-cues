@@ -187,7 +187,7 @@ function renderShell(){
   S.lastTab=null;
   return h;
 }
-function tab(id,label,icon){ var mark=icon==="theatre"?'<span class="tab-emoji" aria-hidden="true">🎭</span>':ic(icon,22); return '<button class="tab" data-act="tab" data-t="'+id+'" aria-current="'+(S.tab===id)+'">'+mark+'<span>'+label+'</span></button>'; }
+function tab(id,label,icon){ var mark=icon==="theatre"?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 5c3 0 5 2 6 5-2 1-3 4-3 8H4zM20 5c-3 0-5 2-6 5 2 1 3 4 3 8h3z"/><path d="M10 4c0 2 1 4 2 5 1-1 2-3 2-5M8 18h8"/></svg>':ic(icon,22); return '<button class="tab" data-act="tab" data-t="'+id+'" aria-current="'+(S.tab===id)+'">'+mark+'<span>'+label+'</span></button>'; }
 function renderNoProd(){
   return '<h1 class="h1">Welcome, '+esc(S.user.name.split(" ")[0])+'</h1>'
    +(isAdmin()?'<div class="empty">No shows yet. Create the first one.</div><button class="btn primary block" data-act="new-prod">'+ic("plus",20)+' New show</button>'
