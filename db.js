@@ -74,9 +74,7 @@ async function makeFirebase(cfg){
   var mods = await Promise.all([import(base+"firebase-app.js"), import(base+"firebase-auth.js"), import(base+"firebase-firestore.js")]);
   var A = mods[0], Au = mods[1], F = mods[2];
   var app = A.initializeApp(cfg), auth = Au.getAuth(app);
-  var db;
-  try{ db = F.initializeFirestore(app, {localCache: F.persistentLocalCache({tabManager: F.persistentMultipleTabManager()})}); }
-  catch(e){ db = F.getFirestore(app); }
+  var db = F.getFirestore(app);
   function mapAuthError(e){
     var c = (e && e.code) || "";
     if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found"||c==="auth/invalid-login-credentials") return fail("bad","Wrong username or code.");
@@ -99,10 +97,25 @@ async function makeFirebase(cfg){
     onAuth:function(cb){
       Au.onAuthStateChanged(auth, async function(u){
         if(!u){ cb(null); return; }
+        var timer=null;
         try{
-          var s = await F.getDoc(F.doc(db,"users",u.uid));
-          cb(s.exists() ? {uid:u.uid, username:s.data().username, name:s.data().name, isAdmin:!!s.data().isAdmin} : null);
-        }catch(e){ cb(null); }
+          var profile=await Promise.race([
+            F.getDoc(F.doc(db,"users",u.uid)),
+            new Promise(function(_,reject){ timer=setTimeout(function(){ reject(fail("profile-timeout","Your account was verified, but its profile did not load. Check your connection and try again.")); },8000); })
+          ]);
+          if(timer) clearTimeout(timer);
+          if(!profile.exists()){
+            await Au.signOut(auth);
+            cb(null,fail("profile-missing","Your account profile is missing. Ask an admin to restore it."));
+            return;
+          }
+          var d=profile.data();
+          cb({uid:u.uid, username:d.username, name:d.name, isAdmin:!!d.isAdmin});
+        }catch(e){
+          if(timer) clearTimeout(timer);
+          try{ await Au.signOut(auth); }catch(ignore){}
+          cb(null,e);
+        }
       });
     },
     setupAdmin:function(o){ return wrap((async function(){
