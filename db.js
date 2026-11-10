@@ -74,7 +74,9 @@ async function makeFirebase(cfg){
   var mods = await Promise.all([import(base+"firebase-app.js"), import(base+"firebase-auth.js"), import(base+"firebase-firestore.js")]);
   var A = mods[0], Au = mods[1], F = mods[2];
   var app = A.initializeApp(cfg), auth = Au.getAuth(app);
-  var db = F.getFirestore(app);
+  var db;
+  try{ db = F.initializeFirestore(app, {experimentalForceLongPolling:true}); }
+  catch(e){ db = F.getFirestore(app); }
   function mapAuthError(e){
     var c = (e && e.code) || "";
     if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found"||c==="auth/invalid-login-credentials") return fail("bad","Wrong username or code.");
