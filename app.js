@@ -15,6 +15,7 @@ var DB = null;
 var S = {ready:false, user:null, needsSetup:false, users:[], prods:[], pid:null, cues:[], notes:[], events:[], publicShows:[], responses:{}, responseSaving:{}, scripts:[], highlights:[],
   tab:"home", lastTab:null, prodView:"overview", lastProdView:null, calMonth:null, calSelected:"", calMode:"month", theme:"system", lang:"en", form:{}, sceneId:null, dept:"all", live:null, sheet:null, toast:"", dirty:false, authErr:"", busy:false, fatal:""};
 var unsub = {users:null, prods:null, cues:null, notes:null, events:null, publicShows:null, highlights:null, scripts:null, responses:{}};
+var highlightWatchToken=0;
 
 /* ===== helpers ===== */
 function uid(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3); }
@@ -44,11 +45,18 @@ function sortedCues(dept){
 }
 function numberOf(c){ var list=sortedCues(c.dept); for(var i=0;i<list.length;i++) if(list[i].id===c.id) return (c.dept==="lighting"?"L":"Q")+(i+1); return "?"; }
 function watchCurrentHighlights(){
+  var token=++highlightWatchToken;
   if(unsub.highlights){try{unsub.highlights();}catch(e){} unsub.highlights=null;}
   S.highlights=[];
   var p=prod(), sc=scene();
-  if(p&&sc&&S.user&&S.tab==="production"&&S.prodView==="script")
-    unsub.highlights=DB.watchHighlights(p.id,sc.id,S.user.uid,function(rows){S.highlights=rows||[];softRender();});
+  if(p&&sc&&S.user&&S.tab==="production"&&S.prodView==="script"){
+    var pid=p.id, sid=sc.id, uid=S.user.uid;
+    unsub.highlights=DB.watchHighlights(pid,sid,uid,function(rows){
+      if(token!==highlightWatchToken||S.pid!==pid||S.sceneId!==sid||!S.user||S.user.uid!==uid||S.tab!=="production"||S.prodView!=="script") return;
+      S.highlights=rows||[];
+      refreshProductionContent();
+    });
+  }
 }
 function toast(msg){ S.toast=msg; render(); setTimeout(function(){ if(S.toast===msg){ S.toast=""; render(); } },2600); }
 function err(e){ return (e&&e.message)||"Something went wrong."; }
@@ -238,13 +246,22 @@ function renderProduction(p){
   views.forEach(function(v){ h+='<button role="tab" data-act="prod-view" data-v="'+v[0]+'" aria-selected="'+(S.prodView===v[0])+'">'+v[1]+'</button>'; });
   h+='</div>';
   var order=["overview","script","cues","notes"], changed=!!(S.lastProdView&&S.lastProdView!==S.prodView);
-  var from=order.indexOf(S.prodView)>=order.indexOf(S.lastProdView)?"16px":"-16px", content="";
-  if(S.prodView==="overview") content=renderProductionOverview(p);
-  else if(S.prodView==="script") content=sceneChips(p)+renderScript(p);
-  else if(S.prodView==="cues") content=sceneChips(p)+(canRunLiveMode()?'<button class="btn primary block" data-act="open-live">Open Live mode</button>':'')+renderCues(p);
-  else content=sceneChips(p)+renderNotes(p,scene());
+  var from=order.indexOf(S.prodView)>=order.indexOf(S.lastProdView)?"16px":"-16px";
+  var content=renderProductionContent(p);
   S.lastProdView=null;
   return h+'<div class="prod-tab-content'+(changed?' prod-tab-slide':'')+'" style="--slide-from:'+from+'">'+content+'</div>';
+}
+function renderProductionContent(p){
+  if(S.prodView==="overview") return renderProductionOverview(p);
+  if(S.prodView==="script") return sceneChips(p)+renderScript(p);
+  if(S.prodView==="cues") return sceneChips(p)+(canRunLiveMode()?'<button class="btn primary block" data-act="open-live">Open Live mode</button>':'')+renderCues(p);
+  return sceneChips(p)+renderNotes(p,scene());
+}
+function refreshProductionContent(){
+  var p=prod(), content=document.querySelector(".prod-tab-content");
+  if(!p||!content||S.tab!=="production"||S.live||S.sheet) return;
+  content.innerHTML=renderProductionContent(p);
+  applyLanguage();
 }
 function renderProductionOverview(p){
   var upcoming=nextEvent(p.id), mine=S.notes.filter(function(n){ return n.to===S.user.uid; }).length;
@@ -638,7 +655,13 @@ function handle(act, el){
     case "prod-view": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView=el.getAttribute("data-v"); watchCurrentHighlights(); render(); window.scrollTo(0,0); break;
     case "go-notes": if(S.tab==="production") S.lastProdView=S.prodView; else S.lastTab=S.tab; S.tab="production"; S.prodView="notes"; watchCurrentHighlights(); render(); break;
     case "dept": S.dept=el.getAttribute("data-d"); render(); break;
-    case "scene": S.sceneId=el.getAttribute("data-id"); watchCurrentHighlights(); render(); break;
+    case "scene":
+      var nextSceneId=el.getAttribute("data-id");
+      if(nextSceneId===S.sceneId) break;
+      S.sceneId=nextSceneId;
+      watchCurrentHighlights();
+      refreshProductionContent();
+      break;
     case "prod-menu": openSheet({type:"prod-menu"}); break;
     case "switch-prod": selectProd(el.getAttribute("data-id")); S.sheet=null; render(); break;
 
