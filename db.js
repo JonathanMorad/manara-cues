@@ -42,10 +42,10 @@ function makeDemo(){
       var id = uid(); d.users[id] = {uid:id, username:cleanUsername(o.username), name:o.name, isAdmin:!!o.isAdmin, code:o.code}; save(); return Promise.resolve(id);
     },
     watchUsers:function(cb){ return watch(function(){ return Object.keys(d.users).map(function(k){ return pub(d.users[k]); }); }, cb); },
-    watchProductions:function(user, cb){
+    watchShows:function(user, cb){
       return watch(function(){ return Object.keys(d.prods).map(function(k){ return d.prods[k]; }).filter(function(p){ return user.isAdmin || (p.memberIds||[]).indexOf(user.uid)>-1; }); }, cb);
     },
-    saveProduction:function(p){ d.prods[p.id] = plain(p); save(); return Promise.resolve(); },
+    saveShow:function(p){ d.prods[p.id] = plain(p); save(); return Promise.resolve(); },
     watchCues:function(pid, cb){ return watch(function(){ return Object.keys(d.cues).map(function(k){ return d.cues[k]; }).filter(function(c){ return c.pid===pid; }); }, cb); },
     saveCue:function(pid, c){ d.cues[c.id] = Object.assign(plain(c), {pid:pid}); save(); return Promise.resolve(); },
     deleteCue:function(pid, id){ delete d.cues[id]; save(); return Promise.resolve(); },
@@ -141,11 +141,11 @@ async function makeFirebase(cfg){
       return cred.user.uid;
     })()); },
     watchUsers:function(cb){ return F.onSnapshot(F.collection(db,"users"), function(s){ cb(docs(s)); }, function(){}); },
-    watchProductions:function(user, cb){
+    watchShows:function(user, cb){
       var q = user.isAdmin ? F.collection(db,"productions") : F.query(F.collection(db,"productions"), F.where("memberIds","array-contains",user.uid));
       return F.onSnapshot(q, function(s){ cb(docs(s)); }, function(){});
     },
-    saveProduction:function(p){ return wrap(F.setDoc(F.doc(db,"productions",p.id), plain(p))); },
+    saveShow:function(p){ return wrap(F.setDoc(F.doc(db,"productions",p.id), plain(p))); },
     watchCues:function(pid, cb){ return F.onSnapshot(F.collection(db,"productions",pid,"cues"), function(s){ cb(docs(s)); }, function(){}); },
     saveCue:function(pid, c){ return wrap(F.setDoc(F.doc(db,"productions",pid,"cues",c.id), plain(c))); },
     deleteCue:function(pid, id){ return wrap(F.deleteDoc(F.doc(db,"productions",pid,"cues",id))); },
