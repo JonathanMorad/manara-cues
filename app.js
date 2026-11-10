@@ -610,11 +610,11 @@ function selectProd(id){
   }
   watchCurrentHighlights();
 }
-function onUser(u){
+function onUser(u,authError){
   var fresh = u && (!S.user || S.user.uid!==u.uid);
   S.user=u; S.ready=true; S.busy=false; if(u) S.form={};
   if(fresh){ S.tab="home"; S.prodView="overview"; S.dept="all"; S.sceneId=null; S.live=null; S.sheet=null; }
-  if(u){ S.authErr=""; startWatch(); } else { stopAll(); S.prods=[]; S.cues=[]; S.notes=[]; S.events=[]; S.publicShows=[]; S.highlights=[]; S.scripts=[]; S.responses={}; S.users=[]; S.pid=null; S.live=null; S.sheet=null; }
+  if(u){ S.authErr=""; startWatch(); } else { if(authError) S.authErr="Your sign-in was verified, but your account profile did not load. Refresh and try again."; stopAll(); S.prods=[]; S.cues=[]; S.notes=[]; S.events=[]; S.publicShows=[]; S.highlights=[]; S.scripts=[]; S.responses={}; S.users=[]; S.pid=null; S.live=null; S.sheet=null; }
   render();
 }
 function saveProd(p){
