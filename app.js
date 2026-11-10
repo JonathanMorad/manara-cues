@@ -81,6 +81,7 @@ Object.assign(AR_TEXT,{"Coming up":"قريبًا","scene":"مشهد","scenes":"�
 Object.assign(AR_TEXT,{"Going":"الحاضرون","Can’t make it":"المعتذرون","No one yet":"لا أحد حتى الآن"});
 AR_TEXT["Account codes are managed by admins. Contact an admin if you need help signing in."]="يتولى المشرفون إدارة رموز الدخول. تواصل مع أحدهم إذا احتجت إلى مساعدة في تسجيل الدخول.";
 AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
+AR_TEXT["Sign-in is taking longer than expected. Check your connection and try again."]="تسجيل الدخول يستغرق وقتًا أطول من المتوقع. تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.";
 AR_TEXT["Go to calendar"]="اذهب إلى التقويم";
 
 /* ===== logo ===== */
@@ -633,7 +634,8 @@ function handle(act, el){
       var u=(document.getElementById("f_username")||{}).value, c=(document.getElementById("f_code")||{}).value;
       if(!u||!c){ S.authErr="Enter your username and passcode."; render(); break; }
       S.busy=true; S.authErr=""; render();
-      DB.login(u,c).then(function(){ /* onAuth will continue */ }).catch(function(e){ S.busy=false; S.authErr=err(e); render(); });
+      var loginWait=setTimeout(function(){ if(S.busy&&!S.user){ S.busy=false; S.authErr="Sign-in is taking longer than expected. Check your connection and try again."; render(); } },12000);
+      DB.login(u,c).then(function(){ /* onAuth will continue */ }).catch(function(e){ clearTimeout(loginWait); S.busy=false; S.authErr=err(e); render(); });
       break;
     case "setup":
       var nm=(document.getElementById("f_name")||{}).value||"", un=(document.getElementById("f_username")||{}).value||"", cd=(document.getElementById("f_code")||{}).value||"";
